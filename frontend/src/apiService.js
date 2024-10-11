@@ -1,0 +1,39 @@
+const apiHostName = process.env.REACT_APP_API_HOST;
+
+async function listBots() {
+  try {
+    const response = await fetch(`${apiHostName}/listBots`);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    const bots = await response.json();
+
+    return bots;
+  } catch (error) {
+    console.error('Error fetching bots:', error);
+    return null;
+  }
+}
+
+async function getBotDetails(id) {
+  const response = await fetch(`${apiHostName}/botDetails?id=${id}`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch bot details for ID: ${id}`);
+  }
+  return await response.json();
+}
+
+async function chat(id) {
+  const response = await fetch(`${apiHostName}/chat?id=${id}`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch chat for bot with ID: ${id}`);
+  }
+  return await response.json();
+}
+  
+  export default {
+    listBots,
+    getBotDetails,
+    chat
+  };
