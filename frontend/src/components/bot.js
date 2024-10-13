@@ -25,7 +25,7 @@ function Bot() {
   const handleSendMessage = async () => {
     if (input.trim()) {
       const userMessage = { sender: 'user', text: input };
-      setMessages((prevMessages) => [...prevMessages, userMessage]); // Add user message to the chat
+      setMessages((prevMessages) => [...prevMessages, userMessage]); // Add user message to chat
       setInput('');
 
       const botResponse = await apiService.chat(id, userMessage.text);
