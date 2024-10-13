@@ -40,8 +40,9 @@ const chat = async (id, text) => {
   return await response.json();
 };
   
-  export default {
-    listBots,
-    getBotDetails,
-    chat
-  };
+const apiService = {
+  listBots,
+  getBotDetails,
+  chat
+};
+export default apiService;
