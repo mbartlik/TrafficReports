@@ -1,6 +1,6 @@
 const apiHostName = process.env.REACT_APP_API_HOST;
 
-async function listBots() {
+const listBots = async () => {
   try {
     const response = await fetch(`${apiHostName}/listBots`);
 
@@ -16,7 +16,7 @@ async function listBots() {
   }
 }
 
-async function getBotDetails(id) {
+const getBotDetails = async (id) => {
   const response = await fetch(`${apiHostName}/botDetails?id=${id}`);
   if (!response.ok) {
     throw new Error(`Failed to fetch bot details for ID: ${id}`);
@@ -24,13 +24,21 @@ async function getBotDetails(id) {
   return await response.json();
 }
 
-async function chat(id) {
-  const response = await fetch(`${apiHostName}/chat?id=${id}`);
+const chat = async (id, text) => {
+  const response = await fetch(`${apiHostName}/chat`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ id, text }),
+  });
+
   if (!response.ok) {
     throw new Error(`Failed to fetch chat for bot with ID: ${id}`);
   }
+
   return await response.json();
-}
+};
   
   export default {
     listBots,

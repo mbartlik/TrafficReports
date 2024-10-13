@@ -28,7 +28,7 @@ function Bot() {
       setMessages((prevMessages) => [...prevMessages, userMessage]); // Add user message to the chat
       setInput('');
 
-      const botResponse = await apiService.chat(id);
+      const botResponse = await apiService.chat(id, userMessage.text);
       const message = botResponse.message ? botResponse.message : "There was an error getting a response from the bot. Please try again later.";
       setMessages((prevMessages) => [...prevMessages, {
         sender: 'bot',

@@ -10,6 +10,7 @@ const corsOptions = {
   origin: process.env.CLIENT_URL,
 };
 app.use(cors(corsOptions));
+app.use(express.json());
 
 // Example list of bots
 const bots = [
@@ -45,14 +46,18 @@ app.get('/botDetails', (req, res) => {
   }
 });
 
-app.get('/chat', (req, res) => {
-  const { id } = req.query;
+app.post('/chat', (req, res) => {
+  const { id, text } = req.body;
+  console.log(text);
 
-  const message = "test response from the bot with id - " + id
+  // Create a mock response from the bot based on the input text
+  const message = `Bot response for bot ID: ${id}. You said: "${text}"`;
+
+  // Send back the response as JSON
   if (message) {
     res.json({ message });
   } else {
-    res.status(404).json({ message: 'There was an error getting a response from the bot. Please try again later.' });
+    res.status(500).json({ message: 'There was an error getting a response from the bot. Please try again later.' });
   }
 });
 
