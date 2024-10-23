@@ -14,7 +14,6 @@ const Home = () => {
         console.error('Error fetching bots:', error);
       }
     };
-
     fetchBots();
   }, []);
 
