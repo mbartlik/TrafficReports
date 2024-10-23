@@ -1,15 +1,21 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+import requests
 import os
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
 load_dotenv()
+azure_ai_url = os.getenv('AZURE_AI_URL')
+azure_ai_key = os.getenv('AZURE_AI_KEY')
+client_url = os.getenv('CLIENT_URL')
+
+azure_ai_completions_url = f"{azure_ai_url}/openai/deployments/gpt-35-turbo/chat/completions?api-version=2024-08-01-preview"
 
 app = Flask(__name__)
 
 # Set CORS configuration
-CORS(app, resources={r"/*": {"origins": os.getenv('CLIENT_URL')}})
+CORS(app, resources={r"/*": {"origins": client_url}})
 
 # Example list of bots
 bots = [
@@ -52,18 +58,58 @@ def chat():
     data = request.get_json()
     bot_id = data.get('id')
     text = data.get('text')
+    conversation = data.get('messages')
 
-    print(text)
+    error_response = jsonify({'message': 'There was an error getting a response from the bot. Please try again later.'})
 
-    # Create a mock response from the bot based on the input text
-    message = f'Bot response for bot ID: {bot_id}. You said: "{text}"'
+    # Check if environment variables are loaded
+    if not azure_ai_url or not azure_ai_key:
+        raise ValueError("Missing Azure AI URL or key environment variables.")
 
+    # Set up headers with API key
+    headers = {
+        'api-key': azure_ai_key,
+        'Content-Type': 'application/json'
+    }
+
+    request_body_messages = []
+    for message in conversation:
+        request_body_messages.append({
+            "role": "user" if message["sender"] == "user" else "assistant",
+            "content": message["text"]
+        })
+    request_body = {
+        "messages": request_body_messages,
+        "temperature": 0.7,
+        "max_tokens": 1000
+    }
+
+    response = requests.post(azure_ai_completions_url, json=request_body, headers=headers)
+
+    if response.status_code == 200:
+        response = response.json()
+        choices = response.get("choices", [])
+        if choices and len(choices) > 0:
+            message = choices[0].get("message", {}).get("content")
+            
+    else:
+        print(f"Request failed with status code {response.status_code}")
+    
     if message:
         return jsonify({'message': message})
     else:
-        return jsonify({'message': 'There was an error getting a response from the bot. Please try again later.'}), 500
+        return error_response, 500
+
+# Define the ping endpoint
+@app.route('/')
+def ping():
+    return "Ping successful!", 200
 
 # Start the Flask server
 if __name__ == '__main__':
-    port = int(os.getenv('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=True)
+    local_dev = False
+    if local_dev:
+        port = int(os.getenv('PORT', 5000))
+        app.run(host='0.0.0.0', port=port, debug=True)
+    else:
+        app.run()

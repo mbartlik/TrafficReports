@@ -25,10 +25,11 @@ function Bot() {
   const handleSendMessage = async () => {
     if (input.trim()) {
       const userMessage = { sender: 'user', text: input };
-      setMessages((prevMessages) => [...prevMessages, userMessage]); // Add user message to chat
+      const tempAllMessages = [...messages, userMessage];
+      setMessages((prevMessages) => tempAllMessages); // Add user message to chat
       setInput('');
 
-      const botResponse = await apiService.chat(id, userMessage.text);
+      const botResponse = await apiService.chat(id, tempAllMessages);
       const message = botResponse.message ? botResponse.message : "There was an error getting a response from the bot. Please try again later.";
       setMessages((prevMessages) => [...prevMessages, {
         sender: 'bot',
