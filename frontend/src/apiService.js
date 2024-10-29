@@ -24,11 +24,12 @@ const getBotDetails = async (id) => {
   return await response.json();
 }
 
-const chat = async (id, messages) => {
+const chat = async (id, messages, token) => {
   const response = await fetch(`${apiHostName}/chat`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({ id, messages }),
   });
