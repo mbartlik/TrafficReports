@@ -63,7 +63,7 @@ function Bot() {
 
   return (
     <div>
-      {isAuthenticated ? (
+      {isAuthenticated || true ? ( // TODO: require authentication later
         botDetails ? (
           <>
             <h2>Chat with {botDetails.title}</h2> {/* Display the bot title */}
