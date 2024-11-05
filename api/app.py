@@ -3,12 +3,14 @@ from flask_cors import CORS
 import requests
 import os
 from dotenv import load_dotenv
+from sql_helper import get_todays_count, increment_today_count
 
 # Load environment variables from .env file
 load_dotenv()
 azure_ai_url = os.getenv('AZURE_AI_URL')
 azure_ai_key = os.getenv('AZURE_AI_KEY')
 client_url = os.getenv('CLIENT_URL')
+allowed_daily_chats = int(os.getenv('ALLOWED_DAILY_CHATS'))
 
 azure_ai_completions_url = f"{azure_ai_url}/openai/deployments/gpt-35-turbo/chat/completions?api-version=2024-08-01-preview"
 
@@ -55,6 +57,9 @@ def bot_details():
 # Route for chatting with a bot (mock response)
 @app.route('/chat', methods=['POST'])
 def chat():
+    todays_count = get_todays_count()
+    if todays_count > allowed_daily_chats:
+        return jsonify({'message': 'Sorry, usage of chatbots has reached its limit for the day'})
     data = request.get_json()
     bot_id = data.get('id')
     text = data.get('text')
@@ -86,6 +91,8 @@ def chat():
 
     response = requests.post(azure_ai_completions_url, json=request_body, headers=headers)
 
+    increment_today_count()
+
     if response.status_code == 200:
         response = response.json()
         choices = response.get("choices", [])
@@ -107,7 +114,7 @@ def ping():
 
 # Start the Flask server
 if __name__ == '__main__':
-    local_dev = False
+    local_dev = True
     if local_dev:
         port = int(os.getenv('PORT', 5000))
         app.run(host='0.0.0.0', port=port, debug=True)
