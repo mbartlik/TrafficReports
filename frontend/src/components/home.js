@@ -8,7 +8,7 @@ const Home = () => {
   useEffect(() => {
     const fetchBots = async () => {
       try {
-        const botsList = await apiService.listBots();
+        const botsList = await apiService.getBots({isFeatured: 1});
         setBots(botsList);
       } catch (error) {
         console.error('Error fetching bots:', error);
@@ -33,9 +33,9 @@ const Home = () => {
             <h2>Available Bots</h2>
             <ul>
               {bots.map((bot) => (
-                <li key={bot.id}>
-                  <Link to={`/bot/${bot.id}`}>{bot.title}</Link>
-                  <p>{bot.summary}</p>
+                <li key={bot.botId}>
+                  <Link to={`/bot/${bot.botId}`}>{bot.botName}</Link>
+                  <p>{bot.description}</p>
                 </li>
               ))}
             </ul>

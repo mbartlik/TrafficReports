@@ -14,8 +14,8 @@ function Bot() {
   useEffect(() => {
     const getBotDetails = async () => {
       try {
-        const botDetails = await apiService.getBotDetails(id);
-        setBotDetails(botDetails);
+        const botDetails = await apiService.getBots({botId: id});
+        setBotDetails(botDetails[0]);
       } catch (error) {
         console.error(`Error fetching bot details for bot (${id}):`, error);
       }
@@ -66,8 +66,8 @@ function Bot() {
       {isAuthenticated || true ? ( // TODO: require authentication later
         botDetails ? (
           <>
-            <h2>Chat with {botDetails.title}</h2> {/* Display the bot title */}
-            <p>{botDetails.summary}</p> {/* Display the bot description */}
+            <h2>Chat with {botDetails.botName}</h2> {/* Display the bot title */}
+            <p>{botDetails.description}</p> {/* Display the bot description */}
             <hr/>
   
             {/* Display chat messages */}

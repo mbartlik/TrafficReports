@@ -3,6 +3,8 @@ import Navbar from "./components/navbar";
 import Home from "./components/home";
 import About from './components/about';
 import Bot from './components/bot';
+import CreateBot from './components/createBot';
+import MyBots from './components/myBots';
 import {
     BrowserRouter as Router,
     Routes,
@@ -17,6 +19,8 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/bot/:id" element={<Bot />} />
+        <Route path="/create-bot" element={<CreateBot />} />
+        <Route path="/my-bots" element={<MyBots />} />
         {/* <Route
           path="/events"
           element={<Events />}
