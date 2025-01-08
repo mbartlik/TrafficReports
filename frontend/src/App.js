@@ -21,20 +21,6 @@ function App() {
         <Route path="/bot/:id" element={<Bot />} />
         <Route path="/create-bot" element={<CreateBot />} />
         <Route path="/my-bots" element={<MyBots />} />
-        {/* <Route
-          path="/events"
-          element={<Events />}
-        />
-        <Route
-          path="/annual"
-          element={<AnnualReport />}
-        />
-        <Route path="/team" element={<Teams />} />
-        <Route path="/blogs" element={<Blogs />} />
-        <Route
-          path="/sign-up"
-          element={<SignUp />}
-        /> */}
       </Routes>
     </Router>
   );
