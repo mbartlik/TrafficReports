@@ -34,7 +34,7 @@ const Home = () => {
             <ul>
               {bots.map((bot) => (
                 <li key={bot.botId}>
-                  <Link to={`/bot/${bot.botId}`}>{bot.botName}</Link>
+                  <Link to={`/bot/${bot.botId}`}>{bot.name}</Link>
                   <p>{bot.description}</p>
                 </li>
               ))}

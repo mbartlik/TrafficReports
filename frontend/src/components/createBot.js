@@ -11,12 +11,7 @@ function CreateBot() {
   const handleCreateBot = async (bot) => {
     if (user) {
       try {
-        const response = await apiService.createBot(
-          bot.botName,
-          bot.description,
-          bot.links,
-          user.sub
-        );
+        const response = await apiService.createBot(bot, user.sub);
         setSuccess(true);
         setCreatedBotDetails({ botId: response.botId });
       } catch (error) {

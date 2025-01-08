@@ -1,12 +1,10 @@
 const apiHostName = process.env.REACT_APP_API_HOST;
 
-const createBot = async (botName, description, links, userId) => {
+const createBot = async (bot, userId) => {
   // Prepare the data to send
   const data = {
-    name: botName,
-    userId,
-    description,
-    links,
+    bot,
+    userId
   };
 
   try {
@@ -31,13 +29,13 @@ const createBot = async (botName, description, links, userId) => {
   }
 };
 
-const getBots = async (filter) => {
+const getBots = async (filter, includeContext=false) => {
   const response = await fetch(`${apiHostName}/get_bots`, {
     method: 'POST', // Use POST instead of GET
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ filter }),
+    body: JSON.stringify({ filter, includeContext }),
   });
 
   if (!response.ok) {
@@ -48,24 +46,25 @@ const getBots = async (filter) => {
 };
 
 
-const chat = async (id, messages, token) => {
+const chat = async (botDetails, messages, token) => {
   const response = await fetch(`${apiHostName}/chat`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ id, messages }),
+    body: JSON.stringify({ messages, botDetails }),
   });
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch chat for bot with ID: ${id}`);
+    throw new Error(`Failed to fetch chat for bot with ID: ${botDetails.botId}`);
   }
 
   return await response.json();
 };
 
 const updateBot = async (oldBot, newBot) => {
+  console.log(newBot);
   const data = {
     oldBot,
     newBot,
@@ -116,12 +115,36 @@ const deleteBot = async (botId) => {
     throw error; // Re-throw to allow the caller to handle it
   }
 };
+
+// const getBotContext = async (bot) => {
+//   try {
+//     const response = await fetch(`${apiHostName}/get_bot_context`, {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//       },
+//       body: JSON.stringify({ bot }),
+//     });
+
+//     console.log(response);
+
+//     if (!response.ok) {
+//       throw new Error(`Failed to fetch bot context. Status: ${response.status}`);
+//     }
+
+//     const data = await response.json();
+//     return data;
+//   } catch (error) {
+//     console.error('Error fetching bot context:', error);
+//     throw error; // Re-throw to handle it elsewhere if needed
+//   }
+// };
   
 const apiService = {
   createBot,
   updateBot,
   getBots,
   chat,
-  deleteBot
+  deleteBot,
 };
 export default apiService;

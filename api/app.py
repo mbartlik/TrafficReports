@@ -1,3 +1,5 @@
+import requests
+from requests.exceptions import RequestException
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import os
@@ -37,8 +39,13 @@ def chat():
 
     data = request.get_json()
     conversation = data.get('messages')
+    bot_details = data.get('botDetails')
+    only_answer_with_context = bot_details.get('onlyAnswerWithContext')
+
+    if isinstance(only_answer_with_context, str):
+        only_answer_with_context = only_answer_with_context.lower() == 'true'
     
-    message = get_azure_ai_response_from_conversation(conversation)
+    message = get_azure_ai_response_from_conversation(conversation, bot_details['responseStyle'], bot_details['context'], only_answer_with_context)
 
     if message:
         return jsonify({'message': message})
@@ -49,6 +56,7 @@ def chat():
 def get_bots_endpoint():
     data = request.json
     filters = data.get('filter', {})  # Optional filter object
+    include_context = data.get('includeContext', False)
 
     with sql_helper.get_conn() as conn:
         try:
@@ -64,34 +72,33 @@ def get_bots_endpoint():
 @app.route('/create_bot', methods=['POST'])
 def create_bot_endpoint():
     data = request.json
-    bot_name = data.get('name')
+    bot = data.get('bot')
+
+    # Extract required and optional fields from the payload
+    description = bot.get('description')
+    name = bot['name']
+    context = bot['context']
     user_id = data.get('userId')
-    description = data.get('description')
-    links = data.get('links', [])  # List of link items with 'url' and 'description'
+    is_featured = bot.get('isFeatured', 0)
+    greeting_text = bot.get('greetingText')
+    only_answer_with_context = bot.get('onlyAnswerWithContext', 0)
+    response_style = bot.get('responseStyle')
 
     # Generate the botId
-    bot_id = generate_bot_id(bot_name)
+    bot_id = generate_bot_id(name)
 
     with sql_helper.get_conn() as conn:
         try:
-            # First, create the bot with the generated botId
-            result, message = sql_helper.create_bot(conn, bot_name, bot_id, user_id, description)
+            # Create the bot with the new attributes
+            result, message = sql_helper.create_bot(
+                conn, name, bot_id, user_id, description, context, is_featured, greeting_text,
+                only_answer_with_context, response_style
+            )
             if not result:
-                return jsonify({"error": message}), 500  # Return the message if creation fails
+                return jsonify({"error": message}), 500
 
-            # Now, create each link associated with the bot
-            for link in links:
-                url = link['url']
-                link_description = link['description']
-                
-                # Attempt to create each link
-                link_result = sql_helper.create_bot_link(conn, bot_id, url, link_description)
-                if not link_result:
-                    return jsonify({"error": f"Failed to create link '{url}' for bot '{bot_name}'"}), 500
-
-            # Return success response with the botId
             return jsonify({
-                "message": f"Bot '{bot_name}' and all links created successfully",
+                "message": f"Bot '{name}' created successfully",
                 "botId": bot_id
             }), 201
         except Exception as e:
@@ -106,22 +113,23 @@ def update_bot_endpoint():
     with sql_helper.get_conn() as conn:
         try:
             # Generate a new bot ID if the name has changed
-            old_bot_id = old_bot['botId']
+            old_bot_id = old_bot['id']
             new_bot_id = old_bot_id
-            if old_bot['botName'] != new_bot['botName']:
-                new_bot_id = generate_bot_id(new_bot['botName'])
+            if old_bot['name'] != new_bot['name']:
+                new_bot_id = generate_bot_id(new_bot['name'])
 
             # Call the update helper function
             result, message = sql_helper.update_bot(
                 conn,
                 old_bot_id=old_bot_id,
                 new_bot_id=new_bot_id,
-                new_name=new_bot['botName'],
-                new_description=new_bot['description'],
-                old_name=old_bot['botName'],
-                old_description=old_bot['description'],
-                old_links=old_bot['links'],
-                new_links=new_bot['links'],
+                new_name=new_bot['name'],
+                new_description=new_bot.get('description'),
+                new_context=new_bot.get('context'),
+                is_featured=new_bot.get('isFeatured', 0),
+                greeting_text=new_bot.get('greetingText'),
+                only_answer_with_context=new_bot.get('onlyAnswerWithContext', 0),
+                response_style=new_bot.get('responseStyle')
             )
 
             if result:

@@ -21,7 +21,7 @@ function BotDetails({ bot, onClose, updateParent }) {
 
   const handleDeleteBot = async () => {
     try {
-      await apiService.deleteBot(bot.botId); // Assume `deleteBot` is implemented in `apiService`
+      await apiService.deleteBot(bot.id); // Assume `deleteBot` is implemented in `apiService`
       setIsDeleted(true); // Mark the bot as deleted
       updateParent(null); // Notify parent to remove the bot
     } catch (error) {
@@ -48,21 +48,15 @@ function BotDetails({ bot, onClose, updateParent }) {
       ) : (
         <div>
           {/* Display Bot Details */}
-          <h3>{displayedBot.botName}</h3>
+          <h3>{displayedBot.name}</h3>
           <p><strong>Description:</strong> {displayedBot.description}</p>
-
-          {/* Display Links */}
-          <h3>Links</h3>
-          <ul>
-            {displayedBot.links.map((link, index) => (
-              <li key={index}>
-                <a href={link.url} target="_blank" rel="noopener noreferrer">
-                  {link.url}
-                </a>
-                <p>{link.description}</p>
-              </li>
-            ))}
-          </ul>
+          <p><strong>Response Style:</strong> {displayedBot.responseStyle || "N/A"}</p>
+          <p><strong>Greeting Text:</strong> {displayedBot.greetingText || "N/A"}</p>
+          <p><strong>Context:</strong> {displayedBot.context}</p>
+          <p>
+            <strong>Only Answer with Context:</strong>{" "}
+            {displayedBot.onlyAnswerWithContext ? "Yes" : "No"}
+          </p>
 
           {/* Action Buttons */}
           <button onClick={() => setIsEditing(true)}>Edit</button>

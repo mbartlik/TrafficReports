@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth0 } from "@auth0/auth0-react";
 import apiService from '../apiService';
 import BotDetails from './botDetails';
@@ -61,7 +62,7 @@ function MyBots() {
   const updateBot = (newBot) => {
     setBots((prevBots) =>
       prevBots
-        .map((bot) => (bot.botId === selectedBot.botId ? newBot : bot))
+        .map((bot) => (bot.botId === selectedBot.botId ? { ...bot, ...newBot } : bot))
         .filter((bot) => bot !== null)
     );
   };
@@ -78,9 +79,10 @@ function MyBots() {
             <ul>
             {bots.map((bot) => (
                 <li key={bot.botId} style={{ marginBottom: '15px' }}>
-                <h3>{bot.botName}</h3>
+                <h3>{bot.name}</h3>
                 <p>{bot.description}</p>
-                <button onClick={() => setSelectedBot(bot)}>View</button>
+                <button onClick={() => setSelectedBot(bot)}>View Details</button>
+                <Link to={`/bot/${bot.id}`}>Chat</Link>
                 </li>
             ))}
             </ul>

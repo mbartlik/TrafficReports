@@ -82,7 +82,9 @@ azure-storage-blob==1.5.0
 azure-storage-common==1.4.2
 azure-storage-file==1.4.0
 azure-storage-queue==1.4.0
+beautifulsoup4==4.12.3
 blinker==1.8.2
+bs4==0.0.2
 certifi==2024.8.30
 cffi==1.17.1
 charset-normalizer==3.4.0
@@ -112,6 +114,7 @@ python-dotenv==1.0.1
 requests==2.32.3
 requests-oauthlib==2.0.0
 six==1.16.0
+soupsieve==2.6
 typing_extensions==4.12.2
 urllib3==2.2.3
 Werkzeug==3.0.4

@@ -14,8 +14,12 @@ function Bot() {
   useEffect(() => {
     const getBotDetails = async () => {
       try {
-        const botDetails = await apiService.getBots({botId: id});
+        const botDetails = await apiService.getBots({ id }, true);
         setBotDetails(botDetails[0]);
+        // Send the greeting text as the first bot message if it exists
+        if (botDetails[0]?.greetingText) {
+          setMessages([{ sender: 'bot', text: botDetails[0].greetingText }]);
+        }
       } catch (error) {
         console.error(`Error fetching bot details for bot (${id}):`, error);
       }
@@ -47,7 +51,7 @@ function Bot() {
       setMessages((prevMessages) => tempAllMessages); // Add user message to chat
       setInput('');
 
-      const botResponse = await apiService.chat(id, tempAllMessages, token);
+      const botResponse = await apiService.chat(botDetails, tempAllMessages, token);
       const message = botResponse.message ? botResponse.message : "There was an error getting a response from the bot. Please try again later.";
       setMessages((prevMessages) => [...prevMessages, {
         sender: 'bot',
@@ -66,7 +70,7 @@ function Bot() {
       {isAuthenticated || true ? ( // TODO: require authentication later
         botDetails ? (
           <>
-            <h2>Chat with {botDetails.botName}</h2> {/* Display the bot title */}
+            <h2>Chat with {botDetails.name}</h2> {/* Display the bot title */}
             <p>{botDetails.description}</p> {/* Display the bot description */}
             <hr/>
   
