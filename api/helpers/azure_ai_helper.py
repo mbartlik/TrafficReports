@@ -9,7 +9,6 @@ azure_ai_key = os.getenv('AZURE_AI_KEY')
 azure_ai_completions_url = f"{azure_ai_url}/openai/deployments/gpt-35-turbo/chat/completions?api-version=2024-08-01-preview"
 
 def make_azure_ai_call(messages):
-    print(messages)
     if not azure_ai_url or not azure_ai_key:
         raise ValueError("Missing Azure AI URL or key environment variables.")
     
@@ -55,8 +54,6 @@ def get_azure_ai_response_from_conversation(conversation, response_style=None, c
             "content": message["text"]
         } for message in conversation
     ]
-
-    print(request_body_messages)
 
     return make_azure_ai_call(request_body_messages)
 

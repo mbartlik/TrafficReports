@@ -1,6 +1,8 @@
 import React, { useState } from "react";
+import styles from '../styles';
+import LoadingSpinner from './loadingSpinner'; // Import LoadingSpinner
 
-function BotForm({ bot, onSubmit, onCancel, isEditing }) {
+function BotForm({ bot, onSubmit, onCancel, isEditing, isMobile }) {
   const [botName, setBotName] = useState(bot?.name || "");
   const [description, setDescription] = useState(bot?.description || "");
   const [responseStyle, setResponseStyle] = useState(bot?.responseStyle || "");
@@ -9,6 +11,8 @@ function BotForm({ bot, onSubmit, onCancel, isEditing }) {
   const [onlyAnswerWithContext, setOnlyAnswerWithContext] = useState(
     bot?.onlyAnswerWithContext || false
   );
+  const [loading, setLoading] = useState(false); // Add loading state
+  const [successMessage, setSuccessMessage] = useState(""); // Success message state
 
   // Handle input changes
   const handleBotNameChange = (e) => setBotName(e.target.value);
@@ -20,82 +24,137 @@ function BotForm({ bot, onSubmit, onCancel, isEditing }) {
     setOnlyAnswerWithContext(e.target.checked);
 
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSubmit({
-      name: botName,
-      description,
-      responseStyle,
-      context,
-      greetingText,
-      onlyAnswerWithContext,
-    });
+    setLoading(true); // Set loading to true before calling onSubmit
+    setSuccessMessage(""); // Reset success message before submitting
+
+    try {
+      await onSubmit({
+        name: botName,
+        description,
+        responseStyle,
+        context,
+        greetingText,
+        onlyAnswerWithContext,
+      });
+      setSuccessMessage("Bot successfully updated/created!"); // Display success message after successful API call
+    } catch (error) {
+      setSuccessMessage("There was an error while submitting the form."); // Error handling
+    } finally {
+      setLoading(false); // Set loading to false after the API call is finished
+    }
   };
+
+  const mobileFontSizeAdjustment = isMobile ? styles.mobileSubText : {};
 
   return (
     <form onSubmit={handleSubmit}>
       {/* Bot Name */}
-      <h2>{isEditing ? "Edit Bot" : "Create a New Bot"}</h2>
-      <div>
-        <label>Bot Name:</label>
-        <input type="text" value={botName} onChange={handleBotNameChange} required />
+      {isEditing ? <h2 style={styles.formTitle}>Edit Bot</h2> : <br />}
+      <div style={{ ...styles.formField, ...styles.formFieldSmall }}>
+        <label style={{ ...styles.formLabel, ...mobileFontSizeAdjustment }}>Bot Name:</label>
+        <input
+          type="text"
+          value={botName}
+          onChange={handleBotNameChange}
+          required
+          style={styles.formInput}
+        />
       </div>
 
       {/* Bot Description */}
-      <div>
-        <label>Bot Description:</label>
-        <textarea value={description} onChange={handleDescriptionChange} required />
+      <div style={styles.formField}>
+        <label style={{ ...styles.formLabel, ...mobileFontSizeAdjustment }}>Bot Description:</label>
+        <textarea
+          value={description}
+          onChange={handleDescriptionChange}
+          required
+          style={styles.formTextarea}
+        />
       </div>
 
       {/* Response Style */}
-      <div>
-        <label>Response Style:</label>
+      <div style={{ ...styles.formField, ...styles.formFieldSmall }}>
+        <label style={{ ...styles.formLabel, ...mobileFontSizeAdjustment }}>Response Style:</label>
         <input
           type="text"
           value={responseStyle}
           onChange={handleResponseStyleChange}
           placeholder="humorous, formal, etc."
+          style={styles.formInput}
         />
       </div>
 
       {/* Greeting Text */}
-      <div>
-        <label>Greeting Text:</label>
+      <div style={styles.formField}>
+        <label style={{ ...styles.formLabel, ...mobileFontSizeAdjustment }}>Greeting Text:</label>
         <input
           type="text"
           value={greetingText}
           onChange={handleGreetingTextChange}
           placeholder="Welcome! How can I help you today?"
+          style={styles.formInput}
         />
       </div>
 
       {/* Context */}
-      <div>
-        <label>Bot Context:</label>
-        <textarea value={context} onChange={handleContextChange} required />
+      <div style={styles.formField}>
+        <label style={{ ...styles.formLabel, ...mobileFontSizeAdjustment }}>Bot Context:</label>
+        <textarea
+          value={context}
+          onChange={handleContextChange}
+          required
+          style={styles.formTextarea}
+        />
       </div>
 
       {/* Only Answer with Context */}
-      <div>
+      <div style={{ ...styles.formField, ...(isMobile ? styles.mobileSubText : {}) }}>
         <label>
           <input
             type="checkbox"
             checked={onlyAnswerWithContext}
             onChange={handleOnlyAnswerWithContextChange}
+            style={styles.formCheckbox}
           />
           Only answer questions with the provided context
         </label>
       </div>
 
       {/* Submit Button */}
-      <div>
-        <button type="submit">{isEditing ? "Update Bot" : "Create Bot"}</button>
+      <div style={styles.formField}>
+        <button
+          type="submit"
+          style={{
+            ...styles.actionButton,
+            ...styles.formButton,
+            ...(isMobile ? styles.mobileButton : {}),
+          }}
+          disabled={loading} // Disable button while loading
+        >
+          {isEditing ? "Update Bot" : "Create Bot"}
+        </button>
         {onCancel && (
-          <button type="button" onClick={onCancel}>
+          <button
+            type="button"
+            onClick={onCancel}
+            style={{
+              ...styles.actionButton,
+              ...styles.cancelButton,
+              ...(isMobile ? styles.mobileButton : {}),
+            }}
+          >
             Cancel
           </button>
         )}
       </div>
+
+      {/* Show Loading Spinner */}
+      {loading && <LoadingSpinner />} 
+
+      {/* Show Success/Error Message */}
+      {successMessage && <p>{successMessage}</p>}
     </form>
   );
 }

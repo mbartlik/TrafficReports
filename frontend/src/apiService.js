@@ -1,14 +1,44 @@
 const apiHostName = process.env.REACT_APP_API_HOST;
 
+const isDatabaseActive = async () => {
+  const timeout = 2000;
+
+  const timeoutPromise = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error('Request timed out')), timeout)
+  );
+
+  try {
+    const response = await Promise.race([
+      fetch(`${apiHostName}/is-db-active`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }),
+      timeoutPromise,
+    ]);
+
+    if (response.ok) {
+      const result = await response.json();
+      return result.isActive;
+    } else {
+      console.error('Error checking database status:', response.statusText);
+      return false;
+    }
+  } catch (error) {
+    console.error('Error:', error.message);
+    return false;
+  }
+};
+
+
 const createBot = async (bot, userId) => {
-  // Prepare the data to send
   const data = {
     bot,
     userId
   };
 
   try {
-    // Send the POST request to the /create_bot endpoint
     const response = await fetch(`${apiHostName}/create_bot`, {
       method: 'POST',
       headers: {
@@ -22,49 +52,60 @@ const createBot = async (bot, userId) => {
       console.log('Bot created successfully:', responseData.message);
       return responseData;
     } else {
-      throw new Error('Error creating bot');
+      console.error('Error creating bot:', response.statusText);
+      return null;
     }
   } catch (error) {
     console.error('Error:', error);
+    return null;
   }
 };
 
-const getBots = async (filter, includeContext=false) => {
-  const response = await fetch(`${apiHostName}/get_bots`, {
-    method: 'POST', // Use POST instead of GET
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ filter, includeContext }),
-  });
+const getBots = async (filter, includeContext = false) => {
+  try {
+    const response = await fetch(`${apiHostName}/get_bots`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ filter, includeContext }),
+    });
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch bots`);
+    if (response.ok) {
+      return await response.json();
+    } else {
+      console.error('Error fetching bots:', response.statusText);
+      return null;
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    return null;
   }
-
-  return await response.json();
 };
 
+const chat = async (botDetails, messages) => {
+  try {
+    const response = await fetch(`${apiHostName}/chat`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ messages, botDetails }),
+    });
 
-const chat = async (botDetails, messages, token) => {
-  const response = await fetch(`${apiHostName}/chat`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({ messages, botDetails }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch chat for bot with ID: ${botDetails.botId}`);
+    if (response.ok) {
+      return await response.json();
+    } else {
+      console.error(`Error fetching chat for bot with ID ${botDetails.id}:`, response.statusText);
+      return null;
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    return null;
   }
-
-  return await response.json();
 };
 
 const updateBot = async (oldBot, newBot) => {
-  console.log(newBot);
   const data = {
     oldBot,
     newBot,
@@ -84,8 +125,8 @@ const updateBot = async (oldBot, newBot) => {
       console.log('Bot updated successfully:', responseData.message);
       return responseData;
     } else {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Error updating bot');
+      console.error('Error updating bot:', response.statusText);
+      return null;
     }
   } catch (error) {
     console.error('Error updating bot:', error);
@@ -102,49 +143,27 @@ const deleteBot = async (botId) => {
       },
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Error deleting bot');
+    if (response.ok) {
+      const responseData = await response.json();
+      console.log('Bot deleted successfully:', responseData.message);
+      return responseData;
+    } else {
+      console.error('Error deleting bot:', response.statusText);
+      return null;
     }
-
-    const responseData = await response.json();
-    console.log('Bot deleted successfully:', responseData.message);
-    return responseData;
   } catch (error) {
     console.error('Error deleting bot:', error);
-    throw error; // Re-throw to allow the caller to handle it
+    return null;
   }
 };
 
-// const getBotContext = async (bot) => {
-//   try {
-//     const response = await fetch(`${apiHostName}/get_bot_context`, {
-//       method: 'POST',
-//       headers: {
-//         'Content-Type': 'application/json',
-//       },
-//       body: JSON.stringify({ bot }),
-//     });
-
-//     console.log(response);
-
-//     if (!response.ok) {
-//       throw new Error(`Failed to fetch bot context. Status: ${response.status}`);
-//     }
-
-//     const data = await response.json();
-//     return data;
-//   } catch (error) {
-//     console.error('Error fetching bot context:', error);
-//     throw error; // Re-throw to handle it elsewhere if needed
-//   }
-// };
-  
 const apiService = {
+  isDatabaseActive,
   createBot,
   updateBot,
   getBots,
   chat,
   deleteBot,
 };
+
 export default apiService;

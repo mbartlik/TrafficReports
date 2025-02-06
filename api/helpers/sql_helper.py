@@ -24,6 +24,33 @@ def get_todays_count(conn):
         cursor.execute("INSERT INTO DAILY_USAGE (usage_date, usage_count) VALUES (?, ?)", today, 0)
         conn.commit()
         return 0
+    
+def get_database_status(conn):
+    """
+    Retrieves the status of the 'LiveDataBotsDB' database by querying the sys.databases catalog view.
+    """
+    try:
+        query = """
+        SELECT name, state_desc 
+        FROM sys.databases 
+        WHERE name = 'LiveDataBotsDB'
+        """
+
+        cursor = conn.cursor()
+        cursor.execute(query)
+
+        # Fetch the result
+        result = cursor.fetchone()
+
+        if result:
+            return {"database": result[0], "status": result[1]}
+        else:
+            print("database not found")
+            return None  # Database not found
+
+    except Exception as e:
+        print(f"Error retrieving database status: {e}")
+        return None
 
 def increment_today_count(conn):
     today = date.today()

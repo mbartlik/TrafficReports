@@ -1,5 +1,4 @@
-import requests
-from requests.exceptions import RequestException
+import concurrent.futures
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import os
@@ -27,6 +26,29 @@ def generate_bot_id(bot_name):
     # Convert to lowercase
     bot_id = bot_id.lower()
     return bot_id
+
+@app.route('/is-db-active', methods=['GET'])
+def is_db_active():
+    """Checks if the 'Bots' database is active (ONLINE) with a timeout of 4 seconds."""
+    
+    def check_database_status():
+        with sql_helper.get_conn() as conn:
+            status = sql_helper.get_database_status(conn)
+            if status is None:
+                return {"isActive": False}
+            return {"isActive": status.get("status") == "ONLINE"}
+    
+    try:
+        # Execute the task with a timeout using concurrent.futures
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            future = executor.submit(check_database_status)
+            return jsonify(future.result(timeout=2.5)), 200
+
+    except concurrent.futures.TimeoutError:
+        return jsonify({"isActive": False}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 # Route for chatting with a bot
 @app.route('/chat', methods=['POST'])
@@ -56,7 +78,6 @@ def chat():
 def get_bots_endpoint():
     data = request.json
     filters = data.get('filter', {})  # Optional filter object
-    include_context = data.get('includeContext', False)
 
     with sql_helper.get_conn() as conn:
         try:
@@ -99,7 +120,7 @@ def create_bot_endpoint():
 
             return jsonify({
                 "message": f"Bot '{name}' created successfully",
-                "botId": bot_id
+                "id": bot_id
             }), 201
         except Exception as e:
             return jsonify({"error": str(e)}), 500

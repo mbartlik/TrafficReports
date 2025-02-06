@@ -1,36 +1,50 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useAuth0 } from "@auth0/auth0-react";
 import apiService from '../apiService';
 import BotDetails from './botDetails';
+import BotListItem from './botListItem';
+import LoadingSpinner from './loadingSpinner';
+import styles from '../styles';
 
-function MyBots() {
+function MyBots({ isMobile }) {
   const { isAuthenticated, user, loginWithRedirect } = useAuth0();
   const [bots, setBots] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedBot, setSelectedBot] = useState(null);
 
-  // Fetch bots on component mount
   useEffect(() => {
     if (isAuthenticated && user) {
       const fetchBots = async () => {
-        setLoading(true); // Start loading
+        setLoading(true);
         try {
-          // Call API to get the list of bots
           const response = await apiService.getBots({ userId: user.sub });
-          setBots(response); // Assuming the API response is the list of bots
+          if (!response || response.length === 0) {
+            setError("No bots found. Please try again later.");
+          } else {
+            setBots(response);
+          }
         } catch (err) {
           console.error("Error fetching bots:", err);
           setError("Failed to fetch bots. Please try again later.");
         } finally {
-          setLoading(false); // Stop loading
+          setLoading(false);
         }
       };
 
       fetchBots();
     }
   }, [isAuthenticated, user]);
+
+  const updateBot = (newBot) => {
+    setBots((prevBots) =>
+      newBot
+        ? prevBots.map((bot) =>
+            bot.id === selectedBot.id ? { ...bot, ...newBot } : bot
+          )
+        : prevBots.filter((bot) => bot.id !== selectedBot.id)
+    );
+  };
 
   if (!isAuthenticated) {
     return (
@@ -42,12 +56,7 @@ function MyBots() {
   }
 
   if (loading) {
-    return (
-      <div>
-        <h3>Loading your bots...</h3>
-        <p>Please wait while we fetch your data.</p>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   if (error) {
@@ -59,33 +68,33 @@ function MyBots() {
     );
   }
 
-  const updateBot = (newBot) => {
-    setBots((prevBots) =>
-      prevBots
-        .map((bot) => (bot.botId === selectedBot.botId ? { ...bot, ...newBot } : bot))
-        .filter((bot) => bot !== null)
-    );
-  };
-
   return (
     <div>
       {selectedBot ? (
-        <BotDetails bot={selectedBot} onClose={() => setSelectedBot(null)} updateParent={updateBot} />
+        <BotDetails
+          bot={selectedBot}
+          onClose={() => setSelectedBot(null)}
+          updateParent={updateBot}
+          isMobile={isMobile}
+        />
       ) : bots.length === 0 ? (
         <p>No bots found.</p>
       ) : (
         <>
-            <h2>My Bots</h2>
-            <ul>
+          <h2>My Bots</h2>
+          <ul style={isMobile ? { paddingInlineStart: 0 } : {}}>
             {bots.map((bot) => (
-                <li key={bot.botId} style={{ marginBottom: '15px' }}>
-                <h3>{bot.name}</h3>
-                <p>{bot.description}</p>
-                <button onClick={() => setSelectedBot(bot)}>View Details</button>
-                <Link to={`/bot/${bot.id}`}>Chat</Link>
-                </li>
+              <BotListItem
+                key={bot.id}
+                bot={bot}
+                style={styles.myBotListItem}
+                linkPath={`/bot/${bot.id}`}
+                showButtons={true}
+                onDetailsClick={(selected) => setSelectedBot(selected)}
+                isMobile={isMobile}
+              />
             ))}
-            </ul>
+          </ul>
         </>
       )}
     </div>

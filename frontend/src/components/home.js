@@ -1,50 +1,31 @@
-import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import apiService from '../apiService';
+import React from 'react';
+import styles from '../styles';
+import BotListItem from './botListItem';
+import LoadingSpinner from './loadingSpinner';
 
-const Home = () => {
-  const [bots, setBots] = useState([]);
-
-  useEffect(() => {
-    const fetchBots = async () => {
-      try {
-        const botsList = await apiService.getBots({isFeatured: 1});
-        setBots(botsList);
-      } catch (error) {
-        console.error('Error fetching bots:', error);
-      }
-    };
-
-    fetchBots();
-  }, []);
-
-  return (
+const Home = ({ bots, loading, isMobile, isDbActive }) => {
+  return isDbActive ? (
     <div>
-      {/* About section */}
-      <section>
-        <h2>About</h2>
-        <p>This is a website where you can access and create chatbots that have access to live information.</p>
-      </section>
-
-      {/* List of bots */}
-      <section>
-        {bots ? (
-          <>
-            <h2>Available Bots</h2>
-            <ul>
-              {bots.map((bot) => (
-                <li key={bot.botId}>
-                  <Link to={`/bot/${bot.botId}`}>{bot.name}</Link>
-                  <p>{bot.description}</p>
-                </li>
-              ))}
-            </ul>
-          </>
-        ) : <h2>It seems there was a problem getting the bots. Please try again later</h2>}
-       
-      </section>
+      {loading ? (
+        <LoadingSpinner />
+      ) : (
+        <section>
+          {bots.length > 0 ? (
+            <>
+              <h2 style={isMobile ? styles.mobileHeader : {}}>Featured Bots</h2>
+              <ul style={isMobile ? styles.mobileList : {}}>
+                {bots.map((bot) => (
+                  <BotListItem key={bot.id} bot={bot} linkPath={`/bot/${bot.id}`} isMobile={isMobile} />
+                ))}
+              </ul>
+            </>
+          ) : (
+            <h2>It seems there was a problem getting the bots. Please try again later</h2>
+          )}
+        </section>
+      )}
     </div>
-  );
+  ) : <></>;
 };
 
 export default Home;

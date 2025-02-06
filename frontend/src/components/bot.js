@@ -1,27 +1,38 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth0 } from "@auth0/auth0-react";
 import apiService from '../apiService';
+import styles from '../styles';
+import LoadingSpinner from './loadingSpinner';
 
 function Bot() {
-  const { isAuthenticated, getAccessTokenSilently } = useAuth0();
-  const [token, setToken] = useState(null);
+  const { isAuthenticated } = useAuth0();
   const { id } = useParams();
   const [botDetails, setBotDetails] = useState(null);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
+  const [botError, setBotError] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const isMobile = window.innerWidth <= 768;
+  const messagesEndRef = useRef(null);
+  const inputRef = useRef(null);
 
   useEffect(() => {
     const getBotDetails = async () => {
       try {
         const botDetails = await apiService.getBots({ id }, true);
+        if (!botDetails || botDetails.length === 0) {
+          setBotError(true);
+          return;
+        }
         setBotDetails(botDetails[0]);
-        // Send the greeting text as the first bot message if it exists
+
         if (botDetails[0]?.greetingText) {
           setMessages([{ sender: 'bot', text: botDetails[0].greetingText }]);
         }
       } catch (error) {
         console.error(`Error fetching bot details for bot (${id}):`, error);
+        setBotError(true);
       }
     };
 
@@ -29,73 +40,77 @@ function Bot() {
   }, [id]);
 
   useEffect(() => {
-    const getToken = async () => {
-      try {
-        const accessToken = await getAccessTokenSilently();
-        setToken(accessToken);
-      } catch (error) {
-        console.error("Error fetching access token", error);
-      }
-    };
+    scrollToBottom();
+  }, [messages, loading]);
 
-    if (isAuthenticated) {
-      getToken();
-    }
-  }, [getAccessTokenSilently, isAuthenticated]);
-
-  // Handle sending a message
   const handleSendMessage = async () => {
     if (input.trim()) {
       const userMessage = { sender: 'user', text: input };
       const tempAllMessages = [...messages, userMessage];
-      setMessages((prevMessages) => tempAllMessages); // Add user message to chat
+      setMessages(tempAllMessages);
       setInput('');
+      setLoading(true);
 
-      const botResponse = await apiService.chat(botDetails, tempAllMessages, token);
-      const message = botResponse.message ? botResponse.message : "There was an error getting a response from the bot. Please try again later.";
-      setMessages((prevMessages) => [...prevMessages, {
-        sender: 'bot',
-        text: message
-      }]);
+      try {
+        const botResponse = await apiService.chat(botDetails, tempAllMessages);
+        const message = botResponse?.message || "Sorry, there was an error sending that chat. Please try again later.";
+        setMessages((prevMessages) => [...prevMessages, { sender: 'bot', text: message }]);
+      } catch (error) {
+        console.error("Error sending chat message:", error);
+        setMessages((prevMessages) => [...prevMessages, { sender: 'bot', text: "Sorry, there was an error sending that chat. Please try again later." }]);
+      } finally {
+        setLoading(false);
+        inputRef.current?.focus(); // Ensure the input stays focused
+      }
     }
   };
 
-  // Handle input field change
   const handleInputChange = (e) => {
     setInput(e.target.value);
   };
 
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
-    <div>
-      {isAuthenticated || true ? ( // TODO: require authentication later
-        botDetails ? (
+    <div style={isMobile ? styles.chatContainerMobile : styles.chatContainer}>
+      {isAuthenticated || true ? (
+        botError ? (
+          <h3>There was an error retrieving information on this bot ({id}). Please try again later.</h3>
+        ) : botDetails ? (
           <>
-            <h2>Chat with {botDetails.name}</h2> {/* Display the bot title */}
-            <p>{botDetails.description}</p> {/* Display the bot description */}
-            <hr/>
-  
-            {/* Display chat messages */}
-            <div>
+            <h2 style={{ ...styles.botTitle, ...(isMobile ? styles.mobileSubHeader : {}) }}>Chat with {botDetails.name}</h2>
+            <p style={{ ...styles.botDescription, ...(isMobile ? { ...styles.mobileSubText, paddingTop: 0 } : {}) }}>{botDetails.description}</p>
+            <hr />
+
+            <div style={isMobile ? styles.messagesContainerMobile : styles.messagesContainer}>
               {messages.map((message, index) => (
-                <div key={index}>
+                <div key={index} style={{ ...(message.sender === 'user' ? styles.userMessage : styles.botMessage), ...(isMobile ? styles.mobileSubText : {}) }}>
                   <strong>{message.sender === 'user' ? 'You' : 'Bot'}:</strong> {message.text}
                 </div>
               ))}
+              {loading && <div style={styles.botMessage}><strong>Bot:</strong> Typing...</div>}
+              <div ref={messagesEndRef} />
             </div>
-  
-            {/* Input field and send button */}
-            <div>
+
+            <form style={styles.inputContainer} onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }}>
               <input
                 type="text"
+                ref={inputRef}
                 value={input}
                 onChange={handleInputChange}
                 placeholder="Type a message..."
+                disabled={loading}
+                style={{ ...styles.chatInput, ...(isMobile ? styles.mobileSubText : {}) }}
               />
-              <button onClick={handleSendMessage}>Send</button>
-            </div>
+              <button type="submit" disabled={loading} style={{ ...styles.sendButton, ...(isMobile ? styles.mobileButton : {}) }}>
+                {loading ? "Sending..." : "Send"}
+              </button>
+            </form>
           </>
         ) : (
-          <h3>Loading...</h3>
+          <LoadingSpinner />
         )
       ) : (
         <h3>Please login to access this chat.</h3>
