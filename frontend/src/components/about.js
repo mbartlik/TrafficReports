@@ -10,7 +10,7 @@ function About(props) {
       </div>
       <br />
       <div>
-        This is a React app hosted with Miscrosoft Azure Static Web Apps. The API is made with the Python Flask framework and hosted with Azure App service. It uses Azure AI Service to dynamically interact with an LLM, and Azure SQL for storing necessary information. The authentication is managed with Auth0.
+        This is a React app hosted with Miscrosoft Azure Static Web Apps. The API is made with the Python Flask framework and hosted with Azure App service. It uses Azure AI Service to dynamically interact with an LLM, and Azure SQL for storing necessary information. The authentication is managed with Auth0. 
       </div>
     </div>
   )
