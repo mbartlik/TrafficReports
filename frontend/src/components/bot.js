@@ -4,6 +4,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import apiService from '../apiService';
 import styles from '../styles';
 import LoadingSpinner from './loadingSpinner';
+import LinkCopyButton from './linkCopyButton';
 
 function Bot() {
   const { isAuthenticated } = useAuth0();
@@ -80,7 +81,10 @@ function Bot() {
           <h3>There was an error retrieving information on this bot ({id}). Please try again later.</h3>
         ) : botDetails ? (
           <>
-            <h2 style={{ ...styles.botTitle, ...(isMobile ? styles.mobileSubHeader : {}) }}>Chat with {botDetails.name}</h2>
+            <div style={{ display: 'flex' }}>
+              <h2 style={{ ...styles.botTitle, ...(isMobile ? styles.mobileSubHeader : {}), marginRight: '1rem' }}>Chat with {botDetails.name}</h2>
+              <LinkCopyButton botId={botDetails.id} />
+            </div>
             <p style={{ ...styles.botDescription, ...(isMobile ? { ...styles.mobileSubText, paddingTop: 0 } : {}) }}>{botDetails.description}</p>
             <hr />
 
