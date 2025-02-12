@@ -100,7 +100,7 @@ function App() {
       <Navbar isMobile={isMobile} />
       <div style={styles.body}>
         <Routes>
-          <Route path="/" element={<Home bots={bots} loading={loading} isMobile={isMobile} isDbActive={isDbActive} />} />
+          <Route path="/" element={<Home bots={bots} loading={loading && isDbActive} isMobile={isMobile} isDbActive={isDbActive} />} />
           <Route path="/about" element={<About isMobile={isMobile} />} />
           <Route path="/bot/:id" element={<Bot isMobile={isMobile} />} />
           <Route path="/create-bot" element={<CreateBot isMobile={isMobile} />} />
