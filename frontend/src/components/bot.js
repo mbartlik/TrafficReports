@@ -45,7 +45,7 @@ function Bot() {
     };
 
     getBotDetails();
-  }, [id]);
+  }, [id, isMobile]);
 
   useEffect(() => {
     scrollToBottom();
