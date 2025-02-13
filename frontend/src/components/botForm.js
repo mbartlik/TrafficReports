@@ -124,17 +124,6 @@ function BotForm({ bot, onSubmit, onCancel, isEditing, isMobile }) {
 
       {/* Submit Button */}
       <div style={styles.formField}>
-        <button
-          type="submit"
-          style={{
-            ...styles.actionButton,
-            ...styles.formButton,
-            ...(isMobile ? styles.mobileButton : {}),
-          }}
-          disabled={loading} // Disable button while loading
-        >
-          {isEditing ? "Update Bot" : "Create Bot"}
-        </button>
         {onCancel && (
           <button
             type="button"
@@ -148,6 +137,17 @@ function BotForm({ bot, onSubmit, onCancel, isEditing, isMobile }) {
             Cancel
           </button>
         )}
+        <button
+          type="submit"
+          style={{
+            ...styles.actionButton,
+            ...styles.formButton,
+            ...(isMobile ? { ...styles.mobileButton, width: '8rem', padding: 0 } : {}),
+          }}
+          disabled={loading} // Disable button while loading
+        >
+          {isEditing ? "Update Bot" : "Create Bot"}
+        </button>
       </div>
 
       {/* Show Loading Spinner */}

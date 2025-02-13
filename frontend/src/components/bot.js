@@ -75,51 +75,53 @@ function Bot() {
   };
 
   return (
-    <div style={isMobile ? styles.chatContainerMobile : styles.chatContainer}>
-      {isAuthenticated || true ? (
-        botError ? (
-          <h3>There was an error retrieving information on this bot ({id}). Please try again later.</h3>
-        ) : botDetails ? (
-          <>
-            <div style={{ display: 'flex' }}>
-              <h2 style={{ ...styles.botTitle, ...(isMobile ? styles.mobileSubHeader : {}), marginRight: '1rem' }}>Chat with {botDetails.name}</h2>
-              <LinkCopyButton botId={botDetails.id} />
-            </div>
-            <p style={{ ...styles.botDescription, ...(isMobile ? { ...styles.mobileSubText, paddingTop: 0 } : {}) }}>{botDetails.description}</p>
-            <hr />
+    <>
+      <div style={isMobile ? styles.chatContainerMobile : styles.chatContainer}>
+        {isAuthenticated || true ? (
+          botError ? (
+            <h3>There was an error retrieving information on this bot ({id}). Please try again later.</h3>
+          ) : botDetails ? (
+            <>
+              <div style={{ display: 'flex' }}>
+                <h2 style={{ ...styles.botTitle, ...(isMobile ? styles.mobileSubHeader : {}), marginRight: '1rem' }}>Chat with {botDetails.name}</h2>
+                <LinkCopyButton botId={botDetails.id} />
+              </div>
+              <p style={{ ...styles.botDescription, ...(isMobile ? { ...styles.mobileSubText, paddingTop: 0 } : {}) }}>{botDetails.description}</p>
+              <hr />
 
-            <div style={isMobile ? styles.messagesContainerMobile : styles.messagesContainer}>
-              {messages.map((message, index) => (
-                <div key={index} style={{ ...(message.sender === 'user' ? styles.userMessage : styles.botMessage), ...(isMobile ? styles.mobileSubText : {}) }}>
-                  <strong>{message.sender === 'user' ? 'You' : 'Bot'}:</strong> {message.text}
-                </div>
-              ))}
-              {loading && <div style={styles.botMessage}><strong>Bot:</strong> Typing...</div>}
-              <div ref={messagesEndRef} />
-            </div>
+              <div style={isMobile ? styles.messagesContainerMobile : styles.messagesContainer}>
+                {messages.map((message, index) => (
+                  <div key={index} style={{ ...(message.sender === 'user' ? styles.userMessage : styles.botMessage), ...(isMobile ? styles.mobileSubText : {}) }}>
+                    <strong>{message.sender === 'user' ? 'You' : 'Bot'}:</strong> {message.text}
+                  </div>
+                ))}
+                {loading && <div style={styles.botMessage}><strong>Bot:</strong> Typing...</div>}
+                <div ref={messagesEndRef} />
+              </div>
 
-            <form style={styles.inputContainer} onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }}>
-              <input
-                type="text"
-                ref={inputRef}
-                value={input}
-                onChange={handleInputChange}
-                placeholder="Type a message..."
-                disabled={loading}
-                style={{ ...styles.chatInput, ...(isMobile ? styles.mobileSubText : {}) }}
-              />
-              <button type="submit" disabled={loading} style={{ ...styles.sendButton, ...(isMobile ? styles.mobileButton : {}) }}>
-                {loading ? "Sending..." : "Send"}
-              </button>
-            </form>
-          </>
+            </>
+          ) : (
+            <LoadingSpinner />
+          )
         ) : (
-          <LoadingSpinner />
-        )
-      ) : (
-        <h3>Please login to access this chat.</h3>
-      )}
-    </div>
+          <h3>Please login to access this chat.</h3>
+        )}
+      </div>
+      <form style={styles.inputContainer} onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }}>
+        <input
+          type="text"
+          ref={inputRef}
+          value={input}
+          onChange={handleInputChange}
+          placeholder="Type a message..."
+          disabled={loading}
+          style={{ ...styles.chatInput, ...(isMobile ? styles.mobileSubText : {}) }}
+        />
+        <button type="submit" disabled={loading} style={{ ...styles.sendButton, ...(isMobile ? styles.mobileButton : {}) }}>
+          {loading ? "Sending..." : "Send"}
+        </button>
+      </form>
+    </>
   );
 }
 
