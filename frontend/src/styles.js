@@ -238,13 +238,13 @@ const styles = {
     borderRadius: "10px",
     display: "flex",
     flexDirection: "column",
-    height: "calc(100vh - 11.5rem)",
+    height: "calc(100dvh - 11.5rem)",
   },
   chatContainerMobile: {
     padding: "15px",
     display: "flex",
     flexDirection: "column",
-    height: "calc(100vh - 8.5rem)",
+    height: "calc(100dvh - 8.5rem)",
   },
   messagesContainer: {
     flexGrow: 1,

@@ -19,6 +19,7 @@ function MyBots({ isMobile }) {
         setLoading(true);
         try {
           const response = await apiService.getBots({ userId: user.sub });
+          console.log(user.sub);
           if (!response) {
             setError("No bots found. Please try again later.");
           } else if (response.length === 0) {
@@ -66,7 +67,6 @@ function MyBots({ isMobile }) {
       <div>
         <h3>Error</h3>
         <p>{error}</p>
-        <p>{user.sub}</p>
       </div>
     );
   }
