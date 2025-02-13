@@ -98,7 +98,7 @@ function App() {
       )}
 
       <Navbar isMobile={isMobile} />
-      <div style={styles.body}>
+      <div style={{ ...styles.body, ...(isMobile ? styles.bodyMobile : {}) }}>
         <Routes>
           <Route path="/" element={<Home bots={bots} loading={loading && isDbActive} isMobile={isMobile} isDbActive={isDbActive} />} />
           <Route path="/about" element={<About isMobile={isMobile} />} />

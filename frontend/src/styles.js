@@ -13,6 +13,9 @@ const styles = {
     height: 'calc(100dvh - 6.5rem)',
     overflowY: 'auto'
   },
+  bodyMobile: { 
+    padding: '0 0.5rem'
+  },
   overlay: {
     position: "fixed",
     top: 0,
