@@ -28,8 +28,15 @@ function Bot() {
         }
         setBotDetails(botDetails[0]);
 
+        if (isMobile) {
+          setMessages([
+            { sender: 'system', text: `Starting chat with - ${botDetails[0].name}`},
+            { sender: 'system', text: `It has this description - ${botDetails[0].description}`}
+          ])
+        }
+
         if (botDetails[0]?.greetingText) {
-          setMessages([{ sender: 'bot', text: botDetails[0].greetingText }]);
+          setMessages((prevMessages) => [...prevMessages, { sender: 'bot', text: botDetails[0].greetingText }]);
         }
       } catch (error) {
         console.error(`Error fetching bot details for bot (${id}):`, error);
@@ -82,17 +89,21 @@ function Bot() {
             <h3>There was an error retrieving information on this bot ({id}). Please try again later.</h3>
           ) : botDetails ? (
             <>
-              <div style={{ display: 'flex' }}>
-                <h2 style={{ ...styles.botTitle, ...(isMobile ? styles.mobileSubHeader : {}), marginRight: '1rem' }}>Chat with {botDetails.name}</h2>
-                <LinkCopyButton botId={botDetails.id} />
-              </div>
-              <p style={{ ...styles.botDescription, ...(isMobile ? { ...styles.mobileSubText, paddingTop: 0 } : {}) }}>{botDetails.description}</p>
-              <hr />
+              {!isMobile && 
+                <>
+                  <div style={{ display: 'flex' }}>
+                    <h2 style={{ ...styles.botTitle, ...(isMobile ? styles.mobileSubHeader : {}), marginRight: '1rem' }}>Chat with {botDetails.name}</h2>
+                    <LinkCopyButton botId={botDetails.id} />
+                  </div>
+                  <p style={{ ...styles.botDescription, ...(isMobile ? { ...styles.mobileSubText, paddingTop: 0 } : {}) }}>{botDetails.description}</p>
+                  <hr />
+                </>
+              }
 
               <div style={isMobile ? styles.messagesContainerMobile : styles.messagesContainer}>
                 {messages.map((message, index) => (
-                  <div key={index} style={{ ...(message.sender === 'user' ? styles.userMessage : styles.botMessage), ...(isMobile ? styles.mobileSubText : {}) }}>
-                    <strong>{message.sender === 'user' ? 'You' : 'Bot'}:</strong> {message.text}
+                  <div key={index} style={{ ...(message.sender === 'user' ? styles.userMessage : message.sender === 'bot' ? styles.botMessage : styles.systemMessage), ...(isMobile ? styles.mobileSubText : {}) }}>
+                    <strong>{message.sender === 'user' ? 'You' : message.sender === 'bot' ? 'Bot' : 'System'}:</strong> {message.text}
                   </div>
                 ))}
                 {loading && <div style={styles.botMessage}><strong>Bot:</strong> Typing...</div>}
@@ -107,7 +118,7 @@ function Bot() {
           <h3>Please login to access this chat.</h3>
         )}
       </div>
-      <form style={styles.inputContainer} onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }}>
+      <form style={{ ...styles.inputContainer, ...(!isMobile ? { maxWidth: '600px', margin: 'auto' } : {}) }} onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }}>
         <input
           type="text"
           ref={inputRef}

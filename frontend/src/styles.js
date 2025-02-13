@@ -247,7 +247,7 @@ const styles = {
     padding: "15px",
     display: "flex",
     flexDirection: "column",
-    height: "calc(100dvh - 8.5rem)",
+    height: "calc(100dvh - 12.6rem)",
   },
   messagesContainer: {
     flexGrow: 1,
@@ -270,6 +270,13 @@ const styles = {
   },
   botMessage: {
     background: COLORS.secondary,
+    borderRadius: "10px",
+    padding: "10px",
+    marginBottom: "10px",
+    textAlign: "left",
+  },
+  systemMessage: {
+    background: '#939995',
     borderRadius: "10px",
     padding: "10px",
     marginBottom: "10px",
