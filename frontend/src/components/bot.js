@@ -27,23 +27,33 @@ function Bot() {
           return;
         }
         setBotDetails(botDetails[0]);
-
-        if (isMobile && messages.length === 0) {
-          setMessages([
-            { sender: 'system', text: `Starting chat with - ${botDetails[0].name}`},
-            { sender: 'system', text: `Description - ${botDetails[0].description}`}
-          ])
-        }
-
-        if (botDetails[0]?.greetingText && messages.length === 0) {
-          setMessages((prevMessages) => [...prevMessages, { sender: 'bot', text: botDetails[0].greetingText }]);
-        }
+  
+        setMessages((prevMessages) => {
+          if (prevMessages.length === 0) {
+            const newMessages = [];
+  
+            if (isMobile) {
+              newMessages.push(
+                { sender: 'system', text: `Starting chat with - ${botDetails[0].name}` },
+                { sender: 'system', text: `Description - ${botDetails[0].description}` }
+              );
+            }
+  
+            if (botDetails[0]?.greetingText) {
+              newMessages.push({ sender: 'bot', text: botDetails[0].greetingText });
+            }
+  
+            return newMessages;
+          }
+          return prevMessages;
+        });
+  
       } catch (error) {
         console.error(`Error fetching bot details for bot (${id}):`, error);
         setBotError(true);
       }
     };
-
+  
     getBotDetails();
   }, [id, isMobile]);
 
