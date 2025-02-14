@@ -94,7 +94,7 @@ function Bot() {
   return (
     <>
       <div style={isMobile ? styles.chatContainerMobile : styles.chatContainer}>
-        {isAuthenticated || true ? (
+        {isAuthenticated ? (
           botError ? (
             <h3>There was an error retrieving information on this bot ({id}). Please try again later.</h3>
           ) : botDetails ? (
@@ -138,7 +138,7 @@ function Bot() {
           disabled={loading}
           style={{ ...styles.chatInput, ...(isMobile ? styles.mobileSubText : {}) }}
         />
-        <button type="submit" disabled={loading} style={{ ...styles.sendButton, ...(isMobile ? styles.mobileButton : {}) }}>
+        <button type="submit" disabled={loading || !isAuthenticated} style={{ ...styles.sendButton, ...(isMobile ? styles.mobileButton : {}) }}>
           {loading ? "Sending..." : "Send"}
         </button>
       </form>

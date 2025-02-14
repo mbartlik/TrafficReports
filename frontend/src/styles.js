@@ -237,11 +237,11 @@ const styles = {
   chatContainer: {
     maxWidth: "600px",
     margin: "20px auto",
-    padding: "20px",
+    padding: "0 20px",
     borderRadius: "10px",
     display: "flex",
     flexDirection: "column",
-    height: "calc(100dvh - 11.5rem)",
+    height: "calc(100dvh - 13rem)",
   },
   chatContainerMobile: {
     padding: "15px",
