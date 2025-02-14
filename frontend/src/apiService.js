@@ -83,14 +83,14 @@ const getBots = async (filter, includeContext = false) => {
   }
 };
 
-const chat = async (botDetails, messages) => {
+const chat = async (botDetails, messages, user) => {
   try {
     const response = await fetch(`${apiHostName}/chat`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ messages, botDetails }),
+      body: JSON.stringify({ messages, botDetails, user }),
     });
 
     if (response.ok) {

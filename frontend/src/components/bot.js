@@ -7,7 +7,7 @@ import LoadingSpinner from './loadingSpinner';
 import LinkCopyButton from './linkCopyButton';
 
 function Bot() {
-  const { isAuthenticated } = useAuth0();
+  const { isAuthenticated, user } = useAuth0();
   const { id } = useParams();
   const [botDetails, setBotDetails] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -28,14 +28,14 @@ function Bot() {
         }
         setBotDetails(botDetails[0]);
 
-        if (isMobile) {
+        if (isMobile && messages.length === 0) {
           setMessages([
             { sender: 'system', text: `Starting chat with - ${botDetails[0].name}`},
-            { sender: 'system', text: `It has this description - ${botDetails[0].description}`}
+            { sender: 'system', text: `Description - ${botDetails[0].description}`}
           ])
         }
 
-        if (botDetails[0]?.greetingText) {
+        if (botDetails[0]?.greetingText && messages.length === 0) {
           setMessages((prevMessages) => [...prevMessages, { sender: 'bot', text: botDetails[0].greetingText }]);
         }
       } catch (error) {
@@ -60,7 +60,7 @@ function Bot() {
       setLoading(true);
 
       try {
-        const botResponse = await apiService.chat(botDetails, tempAllMessages);
+        const botResponse = await apiService.chat(botDetails, tempAllMessages, user.sub);
         const message = botResponse?.message || "Sorry, there was an error sending that chat. Please try again later.";
         setMessages((prevMessages) => [...prevMessages, { sender: 'bot', text: message }]);
       } catch (error) {

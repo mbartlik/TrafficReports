@@ -8,12 +8,12 @@ def get_conn():
     conn = pyodbc.connect(connection_string)
     return conn
 
-def get_todays_count(conn):
+def get_todays_count(conn, user):
     today = date.today()
     cursor = conn.cursor()
     
     # Check if an entry for today exists
-    cursor.execute("SELECT usage_count FROM DAILY_USAGE WHERE usage_date = ?", today)
+    cursor.execute("SELECT usage_count FROM DAILY_USAGE WHERE usage_date = ? AND user_name = ?", (today, user))
     result = cursor.fetchone()
     
     if result:
@@ -21,7 +21,7 @@ def get_todays_count(conn):
         return result.usage_count
     else:
         # If today's entry does not exist, create it with a count of 0
-        cursor.execute("INSERT INTO DAILY_USAGE (usage_date, usage_count) VALUES (?, ?)", today, 0)
+        cursor.execute("INSERT INTO DAILY_USAGE (usage_date, usage_count, user_name) VALUES (?, ?, ?)", today, 0, user)
         conn.commit()
         return 0
     
@@ -52,12 +52,12 @@ def get_database_status(conn):
         print(f"Error retrieving database status: {e}")
         return None
 
-def increment_today_count(conn):
+def increment_today_count(conn, user):
     today = date.today()
     cursor = conn.cursor()
     
     # Update today's count by incrementing it by 1
-    cursor.execute("UPDATE DAILY_USAGE SET usage_count = usage_count + 1 WHERE usage_date = ?", today)
+    cursor.execute("UPDATE DAILY_USAGE SET usage_count = usage_count + 1 WHERE usage_date = ? AND user_name = ?", (today, user))
     
     # Check if the row was updated; if not, create today's entry and set it to 1
     if cursor.rowcount == 0:
@@ -174,4 +174,11 @@ def delete_bot(conn, bot_id):
 #     greetingText NVARCHAR(MAX), -- Custom greeting text for the bot
 #     onlyAnswerWithContext BIT DEFAULT 0, -- Whether the bot should only answer questions using provided context
 #     responseStyle NVARCHAR(255), -- Response style (e.g., humorous, formal)
+# );
+
+# CREATE TABLE DAILY_USAGE (
+#     usage_date DATE NOT NULL,
+#     usage_count INT NOT NULL,
+#     user_name NVARCHAR(255) NOT NULL,
+#     PRIMARY KEY (usage_date, user_name)
 # );

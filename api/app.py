@@ -53,16 +53,17 @@ def is_db_active():
 # Route for chatting with a bot
 @app.route('/chat', methods=['POST'])
 def chat():
-    with sql_helper.get_conn() as sql_connection:
-        todays_count = sql_helper.get_todays_count(sql_connection)
-        if todays_count > allowed_daily_chats:
-            return jsonify({'message': 'Sorry, usage of chatbots has reached its limit for the day'})
-        sql_helper.increment_today_count(sql_connection)
-
     data = request.get_json()
     conversation = data.get('messages')
     bot_details = data.get('botDetails')
     only_answer_with_context = bot_details.get('onlyAnswerWithContext')
+    user = data.get('user')
+
+    with sql_helper.get_conn() as sql_connection:
+        todays_count = sql_helper.get_todays_count(sql_connection, user)
+        if todays_count > allowed_daily_chats:
+            return jsonify({'message': 'Sorry, usage of chatbots has reached its limit for the day'})
+        sql_helper.increment_today_count(sql_connection, user)
 
     if isinstance(only_answer_with_context, str):
         only_answer_with_context = only_answer_with_context.lower() == 'true'
