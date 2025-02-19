@@ -149,6 +149,7 @@ const styles = {
     borderRadius: '4px',
     backgroundColor: COLORS.accent,
     color: COLORS.text,
+    fontFamily: 'Arial, sans-serif'
   },
   formTextarea: {
     width: '100%',
@@ -157,6 +158,7 @@ const styles = {
     borderRadius: '4px',
     backgroundColor: COLORS.accent,
     color: COLORS.text,
+    fontFamily: 'Arial, sans-serif'
   },
   formCheckbox: {
     marginRight: '0.5rem',

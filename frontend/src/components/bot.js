@@ -7,7 +7,7 @@ import LoadingSpinner from './loadingSpinner';
 import LinkCopyButton from './linkCopyButton';
 
 function Bot() {
-  const { isAuthenticated, user } = useAuth0();
+  const { isAuthenticated, user, isLoading: authLoading } = useAuth0();
   const { id } = useParams();
   const [botDetails, setBotDetails] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -27,35 +27,37 @@ function Bot() {
           return;
         }
         setBotDetails(botDetails[0]);
-  
+
         setMessages((prevMessages) => {
           if (prevMessages.length === 0) {
             const newMessages = [];
-  
+
             if (isMobile) {
               newMessages.push(
                 { sender: 'system', text: `Starting chat with - ${botDetails[0].name}` },
                 { sender: 'system', text: `Description - ${botDetails[0].description}` }
               );
             }
-  
+
             if (botDetails[0]?.greetingText) {
               newMessages.push({ sender: 'bot', text: botDetails[0].greetingText });
             }
-  
+
             return newMessages;
           }
           return prevMessages;
         });
-  
+
       } catch (error) {
         console.error(`Error fetching bot details for bot (${id}):`, error);
         setBotError(true);
       }
     };
-  
-    getBotDetails();
-  }, [id, isMobile]);
+
+    if (isAuthenticated) {
+      getBotDetails();
+    }
+  }, [id, isMobile, isAuthenticated]);
 
   useEffect(() => {
     scrollToBottom();
@@ -91,6 +93,10 @@ function Bot() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  if (authLoading) {
+    return <LoadingSpinner />;
+  }
+
   return (
     <>
       <div style={isMobile ? styles.chatContainerMobile : styles.chatContainer}>
@@ -99,7 +105,7 @@ function Bot() {
             <h3>There was an error retrieving information on this bot ({id}). Please try again later.</h3>
           ) : botDetails ? (
             <>
-              {!isMobile && 
+              {!isMobile && (
                 <>
                   <div style={{ display: 'flex' }}>
                     <h2 style={{ ...styles.botTitle, ...(isMobile ? styles.mobileSubHeader : {}), marginRight: '1rem' }}>Chat with {botDetails.name}</h2>
@@ -108,7 +114,7 @@ function Bot() {
                   <p style={{ ...styles.botDescription, ...(isMobile ? { ...styles.mobileSubText, paddingTop: 0 } : {}) }}>{botDetails.description}</p>
                   <hr />
                 </>
-              }
+              )}
 
               <div style={isMobile ? styles.messagesContainerMobile : styles.messagesContainer}>
                 {messages.map((message, index) => (

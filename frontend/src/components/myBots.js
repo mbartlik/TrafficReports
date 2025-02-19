@@ -7,7 +7,7 @@ import LoadingSpinner from './loadingSpinner';
 import styles from '../styles';
 
 function MyBots({ isMobile }) {
-  const { isAuthenticated, user, loginWithRedirect } = useAuth0();
+  const { isAuthenticated, user, loginWithRedirect, isLoading: authLoading } = useAuth0();
   const [bots, setBots] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -48,6 +48,10 @@ function MyBots({ isMobile }) {
         : prevBots.filter((bot) => bot.id !== selectedBot.id)
     );
   };
+
+  if (authLoading) {
+    return <LoadingSpinner />;
+  }
 
   if (!isAuthenticated) {
     return (
