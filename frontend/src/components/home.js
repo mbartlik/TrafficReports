@@ -6,7 +6,7 @@ import LoadingSpinner from './loadingSpinner';
 const Home = ({ bots, loading, isMobile, isDbActive }) => {
   return isDbActive ? (
     <div>
-      {loading ? (
+      {loading && isDbActive ? (
         <LoadingSpinner />
       ) : (
         <section>
