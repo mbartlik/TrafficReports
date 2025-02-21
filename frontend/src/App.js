@@ -11,7 +11,6 @@ import {
     BrowserRouter as Router,
     Routes,
     Route,
-    RouteProps
 } from "react-router-dom";
 
 function App() {

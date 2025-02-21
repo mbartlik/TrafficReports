@@ -10,12 +10,10 @@ function CreateBot({ isMobile }) {
   const { isAuthenticated, loginWithRedirect, user, isLoading: authLoading } = useAuth0();
   const [status, setStatus] = useState("idle"); // idle, loading, success, error
   const [createdBotDetails, setCreatedBotDetails] = useState(null);
-  const [errorMessage, setErrorMessage] = useState(""); // Store specific error message
 
   const handleCreateBot = async (bot) => {
     if (user) {
       setStatus("loading");
-      setErrorMessage(""); // Reset error message on new attempt
       try {
         const response = await apiService.createBot(bot, user.sub);
         if (!response || !response.id) {
@@ -28,7 +26,6 @@ function CreateBot({ isMobile }) {
         console.error("Error creating bot:", error);
         alert(error.message || "There was a problem creating the bot. Please try again later.");
         setStatus("error");
-        setErrorMessage(error.message || "There was a problem creating the bot. Please try again later.");
       }
     }
   };
