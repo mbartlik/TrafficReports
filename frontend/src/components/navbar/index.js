@@ -3,18 +3,42 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { NavLink } from "react-router-dom";
 import styles from "../../styles";
 
-const Navbar = (props) => {
+const Navbar = ({ isMobile }) => {
   const { isAuthenticated, loginWithRedirect, logout } = useAuth0();
-  const { isMobile } = props;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const toggleMenu = () => setIsMenuOpen((prevState) => !prevState);
+  const toggleMenu = () => setIsMenuOpen((prev) => !prev);
+  const closeMenu = () => setIsMenuOpen(false);
 
-  const closeMenu = () => setIsMenuOpen(false); // Function to close the menu
+  const getNavLinkStyles = (isActive) => ({
+    ...styles.navLink,
+    ...(isActive ? styles.navLinkActive : {}),
+    ...(isMobile ? styles.navLinkMobile : {}),
+  });
+
+  const renderNavLinks = () => (
+    <>
+      <NavLink to="/" style={({ isActive }) => getNavLinkStyles(isActive)} onClick={closeMenu}>
+        Home
+      </NavLink>
+      <NavLink to="/about" style={({ isActive }) => getNavLinkStyles(isActive)} onClick={closeMenu}>
+        About
+      </NavLink>
+      {isAuthenticated && (
+        <>
+          <NavLink to="/my-bots" style={({ isActive }) => getNavLinkStyles(isActive)} onClick={closeMenu}>
+            My Bots
+          </NavLink>
+          <NavLink to="/create-bot" style={({ isActive }) => getNavLinkStyles(isActive)} onClick={closeMenu}>
+            Create Bot
+          </NavLink>
+        </>
+      )}
+    </>
+  );
 
   return (
     <nav style={styles.nav}>
-      {/* Mobile Hamburger Icon */}
       {isMobile && (
         <div
           style={{ ...styles.bars, ...(isMobile ? styles.barsMobile : {}) }}
@@ -30,79 +54,32 @@ const Navbar = (props) => {
             ...(isMobile && isMenuOpen ? styles.navMenuMobileOpen : {}),
           }}
         >
-          <NavLink
-            to="/"
-            style={({ isActive }) => ({
-              ...styles.navLink,
-              ...(isActive ? styles.navLinkActive : {}),
-              ...(isMobile ? styles.navLinkMobile : {}),
-            })}
-            onClick={closeMenu} // Close the menu when clicked
-          >
-            Home
-          </NavLink>
-          <NavLink
-            to="/about"
-            style={({ isActive }) => ({
-              ...styles.navLink,
-              ...(isActive ? styles.navLinkActive : {}),
-              ...(isMobile ? styles.navLinkMobile : {}),
-            })}
-            onClick={closeMenu} // Close the menu when clicked
-          >
-            About
-          </NavLink>
-          {isAuthenticated && (
-            <>
-              <NavLink
-                to="/my-bots"
-                style={({ isActive }) => ({
-                  ...styles.navLink,
-                  ...(isActive ? styles.navLinkActive : {}),
-                  ...(isMobile ? styles.navLinkMobile : {}),
-                })}
-                onClick={closeMenu} // Close the menu when clicked
-              >
-                My Bots
-              </NavLink>
-              <NavLink
-                to="/create-bot"
-                style={({ isActive }) => ({
-                  ...styles.navLink,
-                  ...(isActive ? styles.navLinkActive : {}),
-                  ...(isMobile ? styles.navLinkMobile : {}),
-                })}
-                onClick={closeMenu} // Close the menu when clicked
-              >
-                Create Bot
-              </NavLink>
-            </>
-          )}
+          {renderNavLinks()}
         </div>
       )}
-      {!isAuthenticated && (
-        <div style={styles.navBtn}>
-          <button style={{ ...styles.navBtnLink, ...(isMobile ? { ...styles.mobileButton, minWidth: '6rem', padding: 0 } : {}) }} onClick={() => loginWithRedirect()}>
+      <div style={styles.navBtn}>
+        {!isAuthenticated ? (
+          <button
+            style={{
+              ...styles.navBtnLink,
+              ...(isMobile ? { ...styles.mobileButton, minWidth: '6rem', padding: 0 } : {}),
+            }}
+            onClick={loginWithRedirect}
+          >
             Sign In
           </button>
-        </div>
-      )}
-      {isAuthenticated && (
-        <div style={styles.navBtn}>
+        ) : (
           <button
-            style={{ ...styles.navBtnLink, ...(isMobile ? { ...styles.mobileButton, minWidth: '6rem', padding: 0 } : {}) }}
-            onClick={() =>
-              logout({
-                logoutParams: {
-                  returnTo: window.location.origin,
-                },
-              })
-            }
+            style={{
+              ...styles.navBtnLink,
+              ...(isMobile ? { ...styles.mobileButton, minWidth: '6rem', padding: 0 } : {}),
+            }}
+            onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
           >
             Log Out
           </button>
-        </div>
-      )}
+        )}
+      </div>
     </nav>
   );
 };

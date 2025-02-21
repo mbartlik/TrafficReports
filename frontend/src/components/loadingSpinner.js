@@ -14,8 +14,8 @@ const LoadingSpinner = () => {
     position: "fixed",
     top: "50%",
     left: "50%",
-    transform: "translate(-50%, -50%)", // Centers the spinner
-    zIndex: 1000, // Ensure it stays on top of other content
+    transform: "translate(-50%, -50%)",
+    zIndex: 1000,
   };
 
   return (

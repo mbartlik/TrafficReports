@@ -3,7 +3,7 @@ import apiService from '../apiService';
 import BotForm from './botForm';
 import styles from '../styles';
 
-function BotDetails({ bot, onClose, updateParent, isMobile }) {
+const BotDetails = ({ bot, onClose, updateParent, isMobile }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [displayedBot, setDisplayedBot] = useState(bot);
   const [isDeleted, setIsDeleted] = useState(false);
@@ -17,9 +17,7 @@ function BotDetails({ bot, onClose, updateParent, isMobile }) {
     setErrorMessage(null);
     try {
       const response = await apiService.updateBot(bot, updatedBot);
-      if (!response) {
-        throw new Error("Update response is null");
-      }
+      if (!response) throw new Error("Update response is null");
       setIsEditing(false);
       setDisplayedBot(updatedBot);
       updateParent(updatedBot);
@@ -30,15 +28,12 @@ function BotDetails({ bot, onClose, updateParent, isMobile }) {
   };
 
   const handleDeleteBot = async () => {
-    setErrorMessage(null);
-    const userConfirmed = window.confirm("Are you sure you want to delete this bot?");
-    if (!userConfirmed) return; // If the user cancels, exit early
+    if (!window.confirm("Are you sure you want to delete this bot?")) return;
 
+    setErrorMessage(null);
     try {
       const response = await apiService.deleteBot(bot.id);
-      if (!response) {
-        throw new Error("Delete response is null");
-      }
+      if (!response) throw new Error("Delete response is null");
       setIsDeleted(true);
       updateParent(null);
     } catch (error) {
@@ -51,15 +46,22 @@ function BotDetails({ bot, onClose, updateParent, isMobile }) {
 
   return (
     <div style={styles.detailsContainer}>
-      {/* Back Arrow */}
-      <div style={{ ...styles.backArrow, ...(isMobile ? { fontSize: '1.75rem'} : {}) }} onClick={onClose}>
-        ← <span style={{ ...styles.backText, ...(isMobile ? { fontSize: '1.75rem'} : {}) }}>Back</span>
+      <div
+        style={{ ...styles.backArrow, ...isMobile && { fontSize: '1.75rem' } }}
+        onClick={onClose}
+      >
+        ← <span style={{ ...styles.backText, ...isMobile && { fontSize: '1.75rem' } }}>Back</span>
       </div>
 
       {isDeleted ? (
         <div>
           <h3 style={fontStyle}>Bot Deleted Successfully</h3>
-          <button style={{ ...styles.actionButton, ...styles.cancelButton }} onClick={onClose}>Close</button>
+          <button
+            style={{ ...styles.actionButton, ...styles.cancelButton }}
+            onClick={onClose}
+          >
+            Close
+          </button>
         </div>
       ) : isEditing ? (
         <BotForm
@@ -71,25 +73,49 @@ function BotDetails({ bot, onClose, updateParent, isMobile }) {
         />
       ) : (
         <div style={fontStyle}>
-          <div style={{ display: 'flex', height: '2rem', alignItems: 'center', ...(isMobile ? { display: 'block', height: null } : {}) }}>
+          <div
+            style={{
+              display: 'flex',
+              height: '2rem',
+              alignItems: 'center',
+              ...isMobile && { display: 'block', height: 'auto' },
+            }}
+          >
             <h2 style={{ marginRight: '1rem' }}>{displayedBot.name}</h2>
-            <button style={{ ...styles.actionButton, ...styles.chatButton, padding: '10px 20px', ...(isMobile ? styles.mobileButton : {}) }} onClick={() => setIsEditing(true)}>Edit</button>
-            <button style={{ ...styles.actionButton, ...styles.cancelButton, ...(isMobile ? styles.mobileButton : {}) }} onClick={handleDeleteBot}>Delete</button>
+            <button
+              style={{
+                ...styles.actionButton,
+                ...styles.chatButton,
+                padding: '10px 20px',
+                ...isMobile && styles.mobileButton,
+              }}
+              onClick={() => setIsEditing(true)}
+            >
+              Edit
+            </button>
+            <button
+              style={{
+                ...styles.actionButton,
+                ...styles.cancelButton,
+                ...isMobile && styles.mobileButton,
+              }}
+              onClick={handleDeleteBot}
+            >
+              Delete
+            </button>
           </div>
-          <br/>
+          <br />
           <p><strong>Description:</strong> {displayedBot.description}</p>
           <p><strong>Response Style:</strong> {displayedBot.responseStyle || "N/A"}</p>
           <p><strong>Greeting Text:</strong> {displayedBot.greetingText || "N/A"}</p>
           <p><strong>Context:</strong> {displayedBot.context}</p>
-          <p>
-            <strong>Only Answer with Context:</strong>{" "}
-            {displayedBot.onlyAnswerWithContext ? "Yes" : "No"}
-          </p>
+          <p><strong>Only Answer with Context:</strong> {displayedBot.onlyAnswerWithContext ? "Yes" : "No"}</p>
         </div>
       )}
-      {errorMessage && <p style={{ ...styles.errorMsg, ...fontStyle}}>{errorMessage}</p>}
+
+      {errorMessage && <p style={{ ...styles.errorMsg, ...fontStyle }}>{errorMessage}</p>}
     </div>
   );
-}
+};
 
 export default BotDetails;

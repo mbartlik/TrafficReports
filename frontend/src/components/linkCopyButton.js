@@ -34,6 +34,7 @@ const LinkCopyButton = ({ botId }) => {
         onClick={handleCopyClick}
         style={styles.linkCopyButton}
         title="Copy link"
+        aria-label="Copy link to bot"
       >
         <FiCopy size={16} />
       </button>

@@ -102,7 +102,7 @@ def create_bot(conn, name, bot_id, user_id, description, context, is_featured, g
     """Inserts a new bot record into the Bots table."""
     try:
         # Check if bot with the same bot_id already exists
-        existing_bots = get_bots(conn, filters={"botId": bot_id})
+        existing_bots = get_bots(conn, filters={"id": bot_id})
         if existing_bots:
             print(f"Bot with botId '{bot_id}' already exists.")
             return False, "Bot with that botId already exists"

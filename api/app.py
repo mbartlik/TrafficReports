@@ -19,6 +19,8 @@ CORS(app, resources={r"/*": {"origins": client_url}})
 
 def generate_bot_id(bot_name):
     """Generate a botId based on bot name."""
+    # Strip leading and trailing spaces
+    bot_name = bot_name.strip()
     # Replace spaces with hyphens
     bot_id = bot_name.replace(" ", "-")
     # Remove any characters that are not alphanumeric or hyphens

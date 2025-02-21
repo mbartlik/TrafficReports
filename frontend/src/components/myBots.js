@@ -19,7 +19,6 @@ function MyBots({ isMobile }) {
         setLoading(true);
         try {
           const response = await apiService.getBots({ userId: user.sub });
-          console.log(user.sub);
           if (!response) {
             setError("No bots found. Please try again later.");
           } else if (response.length === 0) {
@@ -49,7 +48,7 @@ function MyBots({ isMobile }) {
     );
   };
 
-  if (authLoading) {
+  if (authLoading || loading) {
     return <LoadingSpinner />;
   }
 
@@ -62,15 +61,12 @@ function MyBots({ isMobile }) {
     );
   }
 
-  if (loading) {
-    return <LoadingSpinner />;
-  }
-
   if (error) {
     return (
       <div>
         <h3>Error</h3>
         <p>{error}</p>
+        {/* Optionally, you could add a retry button here */}
       </div>
     );
   }

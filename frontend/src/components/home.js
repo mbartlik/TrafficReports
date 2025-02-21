@@ -4,9 +4,13 @@ import BotListItem from './botListItem';
 import LoadingSpinner from './loadingSpinner';
 
 const Home = ({ bots, loading, isMobile, isDbActive }) => {
-  return isDbActive ? (
+  if (!isDbActive) {
+    return <h2>The database is currently unavailable. Please try again later.</h2>;
+  }
+
+  return (
     <div>
-      {loading && isDbActive ? (
+      {loading ? (
         <LoadingSpinner />
       ) : (
         <section>
@@ -20,12 +24,12 @@ const Home = ({ bots, loading, isMobile, isDbActive }) => {
               </ul>
             </>
           ) : (
-            <h2>It seems there was a problem getting the bots. Please try again later</h2>
+            <h2>No bots available at the moment. Please try again later.</h2>
           )}
         </section>
       )}
     </div>
-  ) : <></>;
+  );
 };
 
 export default Home;

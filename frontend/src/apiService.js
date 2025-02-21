@@ -1,63 +1,46 @@
 const apiHostName = process.env.REACT_APP_API_HOST;
 
+const handleResponse = async (response) => {
+  if (!response.ok) {
+    const responseJson = await response.json();
+    const errorText = responseJson?.error || 'An error occurred while making the request.';
+    throw new Error(errorText);
+  }
+  return response.json();
+};
+
+const timeoutPromise = (timeout) =>
+  new Promise((_, reject) => setTimeout(() => reject(new Error('Request timed out')), timeout));
+
 const isDatabaseActive = async () => {
   const timeout = 2000;
-
-  const timeoutPromise = new Promise((_, reject) =>
-    setTimeout(() => reject(new Error('Request timed out')), timeout)
-  );
-
   try {
     const response = await Promise.race([
       fetch(`${apiHostName}/is-db-active`, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
       }),
-      timeoutPromise,
+      timeoutPromise(timeout),
     ]);
-
-    if (response.ok) {
-      const result = await response.json();
-      return result.isActive;
-    } else {
-      console.error('Error checking database status:', response.statusText);
-      return false;
-    }
+    const result = await handleResponse(response);
+    return result.isActive;
   } catch (error) {
-    console.error('Error:', error.message);
-    return false;
+    console.log('Database not active');
+    throw error; // Re-throw error to ensure it's propagated
   }
 };
 
-
 const createBot = async (bot, userId) => {
-  const data = {
-    bot,
-    userId
-  };
-
   try {
     const response = await fetch(`${apiHostName}/create_bot`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ bot, userId }),
     });
-
-    if (response.ok) {
-      const responseData = await response.json();
-      console.log('Bot created successfully:', responseData.message);
-      return responseData;
-    } else {
-      console.error('Error creating bot:', response.statusText);
-      return null;
-    }
+    return await handleResponse(response);
   } catch (error) {
-    console.error('Error:', error);
-    return null;
+    console.error('Error creating bot:', error.message);
+    throw error; // Re-throw error to allow proper handling upstream
   }
 };
 
@@ -65,21 +48,13 @@ const getBots = async (filter, includeContext = false) => {
   try {
     const response = await fetch(`${apiHostName}/get_bots`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ filter, includeContext }),
     });
-
-    if (response.ok) {
-      return await response.json();
-    } else {
-      console.error('Error fetching bots:', response.statusText);
-      return null;
-    }
+    return await handleResponse(response);
   } catch (error) {
-    console.error('Error:', error);
-    return null;
+    console.error('Error fetching bots:', error.message);
+    throw error;
   }
 };
 
@@ -87,50 +62,27 @@ const chat = async (botDetails, messages, user) => {
   try {
     const response = await fetch(`${apiHostName}/chat`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ messages, botDetails, user }),
     });
-
-    if (response.ok) {
-      return await response.json();
-    } else {
-      console.error(`Error fetching chat for bot with ID ${botDetails.id}:`, response.statusText);
-      return null;
-    }
+    return await handleResponse(response);
   } catch (error) {
-    console.error('Error:', error);
-    return null;
+    console.error('Error chatting with bot:', error.message);
+    throw error;
   }
 };
 
 const updateBot = async (oldBot, newBot) => {
-  const data = {
-    oldBot,
-    newBot,
-  };
-
   try {
     const response = await fetch(`${apiHostName}/update_bot`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ oldBot, newBot }),
     });
-
-    if (response.ok) {
-      const responseData = await response.json();
-      console.log('Bot updated successfully:', responseData.message);
-      return responseData;
-    } else {
-      console.error('Error updating bot:', response.statusText);
-      return null;
-    }
+    return await handleResponse(response);
   } catch (error) {
-    console.error('Error updating bot:', error);
-    return null;
+    console.error('Error updating bot:', error.message);
+    throw error;
   }
 };
 
@@ -138,22 +90,12 @@ const deleteBot = async (botId) => {
   try {
     const response = await fetch(`${apiHostName}/delete_bot/${botId}`, {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
     });
-
-    if (response.ok) {
-      const responseData = await response.json();
-      console.log('Bot deleted successfully:', responseData.message);
-      return responseData;
-    } else {
-      console.error('Error deleting bot:', response.statusText);
-      return null;
-    }
+    return await handleResponse(response);
   } catch (error) {
-    console.error('Error deleting bot:', error);
-    return null;
+    console.error('Error deleting bot:', error.message);
+    throw error;
   }
 };
 

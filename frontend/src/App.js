@@ -10,14 +10,15 @@ import styles from './styles';
 import {
     BrowserRouter as Router,
     Routes,
-    Route
+    Route,
+    RouteProps
 } from "react-router-dom";
 
 function App() {
   const [isDbActive, setIsDbActive] = useState(true);
   const [bots, setBots] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768); // Updated to 768px
   const [overlayMessage, setOverlayMessage] = useState(
     "Database is currently paused. Sorry, this is a hobby project. Please wait a minute or two..."
   );
@@ -36,16 +37,13 @@ function App() {
           clearTimeout(timeoutId); // Clear timeout when active
         }
       } catch (error) {
-        console.error("Error checking database status:", error);
         setIsDbActive(false); // Assume inactive if there's an error
       }
     };
 
-    // Initial check and start checking every 4 seconds
     checkDatabaseStatus();
     interval = setInterval(checkDatabaseStatus, 4000);
 
-    // Handle database timeout message after 2 minutes
     timeoutId = setTimeout(() => {
       setOverlayMessage(
         "Sorry, there's been a problem spinning up the database. Please check again later."
@@ -54,7 +52,7 @@ function App() {
     }, 120000); // 2 minutes in milliseconds
 
     const handleResize = () => {
-      setIsMobile(window.innerWidth <= 600);
+      setIsMobile(window.innerWidth <= 768); // Updated to use 768px for mobile breakpoint
     };
 
     window.addEventListener("resize", handleResize);
@@ -69,7 +67,7 @@ function App() {
   useEffect(() => {
     if (isDbActive) {
       const fetchBots = async () => {
-        setLoading(true); // Show loading indicator
+        setLoading(true);
         try {
           const botsList = await apiService.getBots({ isFeatured: 1 });
           if (!botsList) {
@@ -78,9 +76,9 @@ function App() {
           setBots(botsList);
         } catch (error) {
           console.error('Error fetching bots:', error);
-          setBots([]); // Set an empty array to indicate no bots
+          setBots([]);
         } finally {
-          setLoading(false); // Hide loading indicator
+          setLoading(false);
         }
       };
 
@@ -105,6 +103,8 @@ function App() {
           <Route path="/bot/:id" element={<Bot isMobile={isMobile} />} />
           <Route path="/create-bot" element={<CreateBot isMobile={isMobile} />} />
           <Route path="/my-bots" element={<MyBots isMobile={isMobile} />} />
+          {/* Add a fallback 404 route */}
+          <Route path="*" element={<h2>404 - Page Not Found</h2>} />
         </Routes>
       </div>
     </Router>
