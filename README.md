@@ -2,6 +2,10 @@
 
 Live Site: [https://ashy-ground-08aba070f.5.azurestaticapps.net/](https://ashy-ground-08aba070f.5.azurestaticapps.net/)
 
+## Demo Video
+
+[Download demo video from this repository](demo.mp4)
+
 ## Description
 
 This is a bot creation application, where you can create custom chatbots, providing them with unique knowledge to interact with others. The application allows you to input context for your chatbot, and with that context, the bot can engage in conversations with others via a shared link.
@@ -23,7 +27,3 @@ This project combines the power of React, Python, and Azure services to provide 
 - **AI Service:** Azure AI for LLM-powered interactions
 - **Database:** Azure SQL for data storage
 - **Authentication:** Auth0 for secure user management
-
-## Demo Video
-
-[Download demo video from this repository](demo.mp4)
