@@ -47,7 +47,7 @@ function CreateBot({ isMobile }) {
   return (
     <>
       <br />
-      {status === "loading" && <div>Creating bot, please wait...</div>}
+      {status === "loading" && <LoadingSpinner />}
       {status === "success" && createdBotDetails ? (
         <div>
           <h2>Bot Created Successfully!</h2>
