@@ -13,6 +13,8 @@ function MyBots({ isMobile }) {
   const [error, setError] = useState(null);
   const [selectedBot, setSelectedBot] = useState(null);
 
+  const noBotsMessage = "You haven't created any bots yet. Go to 'Create Bot' to get started";
+
   useEffect(() => {
     if (isAuthenticated && user) {
       const fetchBots = async () => {
@@ -22,7 +24,7 @@ function MyBots({ isMobile }) {
           if (!response) {
             setError("No bots found. Please try again later.");
           } else if (response.length === 0) {
-            setError("You haven't created any bots yet. Go to 'Create Bot' to get started");
+            setError(noBotsMessage);
           } else {
             setBots(response);
           }
@@ -64,7 +66,7 @@ function MyBots({ isMobile }) {
   if (error) {
     return (
       <div>
-        <h3>Error</h3>
+        {error !== noBotsMessage && <h3>Error</h3>}
         <p>{error}</p>
         {/* Optionally, you could add a retry button here */}
       </div>
