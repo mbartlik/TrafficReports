@@ -50,7 +50,6 @@ function CreateBot({ isMobile }) {
       {status === "loading" && <div>Creating bot, please wait...</div>}
       {status === "success" && createdBotDetails ? (
         <div>
-          <br />
           <h2>Bot Created Successfully!</h2>
           <p><strong>Bot ID:</strong> {createdBotDetails.id}</p>
           <Link to={`/bot/${createdBotDetails.id}`} style={{ ...styles.actionButton, ...styles.chatButton, marginLeft: '0' }}>
