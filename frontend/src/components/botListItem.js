@@ -27,7 +27,7 @@ const BotListItem = ({ bot, linkPath, showButtons = false, onDetailsClick, isMob
           {bot.name}
         </h3>
         {showButtons && <LinkCopyButton botId={bot.id} />}
-        {(!showButtons || isMobile) && chatButton}
+        {!showButtons && chatButton}
       </div>
 
       <p style={{ ...styles.botDescription, ...(isMobile ? styles.mobileSubText : {}) }}>
@@ -35,7 +35,7 @@ const BotListItem = ({ bot, linkPath, showButtons = false, onDetailsClick, isMob
       </p>
 
       {showButtons && onDetailsClick && (
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <div style={!isMobile ? { display: 'flex', gap: '0.5rem' } : {}}>
           {chatButton}
           <button
             onClick={() => onDetailsClick(bot)}
