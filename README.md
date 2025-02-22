@@ -26,4 +26,4 @@ This project combines the power of React, Python, and Azure services to provide 
 
 ## Demo Video
 
-[Download demo video from this repo](demo.mp4)
+[Download demo video from this repository](demo.mp4)
