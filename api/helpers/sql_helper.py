@@ -79,6 +79,8 @@ def get_bots(conn, filters=None):
                 filter_conditions.append(f"{key} = ?")
                 params.append(value)
             query += " WHERE " + " AND ".join(filter_conditions)
+        
+        query += " ORDER BY DateCreated"
 
         cursor = conn.cursor()
         cursor.execute(query, params)
