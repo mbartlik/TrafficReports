@@ -24,7 +24,7 @@ const isDatabaseActive = async () => {
       }),
       timeoutPromise(timeout),
     ]);
-    console.log(response)
+    console.log(response);
     const result = await handleResponse(response);
     return result.isActive;
   } catch (error) {
