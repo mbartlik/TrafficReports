@@ -30,82 +30,23 @@ const isDatabaseActive = async () => {
   }
 };
 
-const createBot = async (bot, userId) => {
+const getTrackedRoutes = async (userId) => {
   try {
-    const response = await fetch(`${apiHostName}/create_bot`, {
+    const response = await fetch(`${apiHostName}/get_tracked_routes`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ bot, userId }),
+      body: JSON.stringify({ userId }),
     });
     return await handleResponse(response);
   } catch (error) {
-    console.error('Error creating bot:', error.message);
-    throw error; // Re-throw error to allow proper handling upstream
-  }
-};
-
-const getBots = async (filter, includeContext = false) => {
-  try {
-    const response = await fetch(`${apiHostName}/get_bots`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ filter, includeContext }),
-    });
-    return await handleResponse(response);
-  } catch (error) {
-    console.error('Error fetching bots:', error.message);
-    throw error;
-  }
-};
-
-const chat = async (botDetails, messages, user) => {
-  try {
-    const response = await fetch(`${apiHostName}/chat`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages, botDetails, user }),
-    });
-    return await handleResponse(response);
-  } catch (error) {
-    console.error('Error chatting with bot:', error.message);
-    throw error;
-  }
-};
-
-const updateBot = async (oldBot, newBot) => {
-  try {
-    const response = await fetch(`${apiHostName}/update_bot`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ oldBot, newBot }),
-    });
-    return await handleResponse(response);
-  } catch (error) {
-    console.error('Error updating bot:', error.message);
-    throw error;
-  }
-};
-
-const deleteBot = async (botId) => {
-  try {
-    const response = await fetch(`${apiHostName}/delete_bot/${botId}`, {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-    });
-    return await handleResponse(response);
-  } catch (error) {
-    console.error('Error deleting bot:', error.message);
+    console.error('Error fetching tracked routes:', error.message);
     throw error;
   }
 };
 
 const apiService = {
-  isDatabaseActive,
-  createBot,
-  updateBot,
-  getBots,
-  chat,
-  deleteBot,
+  getTrackedRoutes,
+  isDatabaseActive
 };
 
 export default apiService;

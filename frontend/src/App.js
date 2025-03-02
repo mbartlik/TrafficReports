@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth0 } from '@auth0/auth0-react';
 import Navbar from "./components/navbar";
 import Home from "./components/home";
 import About from './components/about';
-import Bot from './components/bot';
-import CreateBot from './components/createBot';
-import MyBots from './components/myBots';
 import apiService from './apiService';
 import styles from './styles';
 import {
@@ -14,9 +12,10 @@ import {
 } from "react-router-dom";
 
 function App() {
+  const { user, isAuthenticated } = useAuth0(); // Destructure values from useAuth0
   const [isDbActive, setIsDbActive] = useState(true);
-  const [bots, setBots] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [routes, setRoutes] = useState([]);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768); // Updated to 768px
   const [overlayMessage, setOverlayMessage] = useState(
     "Database is currently paused. Sorry, this is a hobby project. Please wait a minute or two..."
@@ -64,26 +63,27 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (isDbActive) {
-      const fetchBots = async () => {
+    if (isDbActive && isAuthenticated && user) {
+      const fetchTrackedRoutes = async () => {
         setLoading(true);
         try {
-          const botsList = await apiService.getBots({ isFeatured: 1 });
-          if (!botsList) {
-            throw new Error('Bots list is null');
+          console.log(user);
+          const routesList = await apiService.getTrackedRoutes(user.sub);
+          if (!routesList) {
+            throw new Error('Routes list is null');
           }
-          setBots(botsList);
+          setRoutes(routesList);
         } catch (error) {
-          console.error('Error fetching bots:', error);
-          setBots([]);
+          console.error('Error fetching routes:', error);
+          setRoutes([]);
         } finally {
           setLoading(false);
         }
       };
 
-      fetchBots();
+      fetchTrackedRoutes();
     }
-  }, [isDbActive]);
+  }, [isDbActive, user, isAuthenticated]);
 
   return (
     <Router>
@@ -97,11 +97,8 @@ function App() {
       <Navbar isMobile={isMobile} />
       <div style={{ ...styles.body, ...(isMobile ? styles.bodyMobile : {}) }}>
         <Routes>
-          <Route path="/" element={<Home bots={bots} loading={loading && isDbActive} isMobile={isMobile} isDbActive={isDbActive} />} />
+          <Route path="/" element={<Home routes={routes} loading={loading && isDbActive} isMobile={isMobile} isDbActive={isDbActive} isAuthenticated={isAuthenticated} />} />
           <Route path="/about" element={<About isMobile={isMobile} />} />
-          <Route path="/bot/:id" element={<Bot isMobile={isMobile} />} />
-          <Route path="/create-bot" element={<CreateBot isMobile={isMobile} />} />
-          <Route path="/my-bots" element={<MyBots isMobile={isMobile} />} />
           {/* Add a fallback 404 route */}
           <Route path="*" element={<h2>404 - Page Not Found</h2>} />
         </Routes>

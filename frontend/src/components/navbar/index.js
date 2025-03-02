@@ -26,11 +26,8 @@ const Navbar = ({ isMobile }) => {
       </NavLink>
       {isAuthenticated && (
         <>
-          <NavLink to="/my-bots" style={({ isActive }) => getNavLinkStyles(isActive)} onClick={closeMenu}>
-            My Bots
-          </NavLink>
           <NavLink to="/create-bot" style={({ isActive }) => getNavLinkStyles(isActive)} onClick={closeMenu}>
-            Create Bot
+            Track new route
           </NavLink>
         </>
       )}
