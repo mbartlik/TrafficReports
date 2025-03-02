@@ -36,7 +36,7 @@ jobs:
           REACT_APP_API_HOST: ${{ secrets.REACT_APP_API_HOST }}
           REACT_APP_AUTH_DOMAIN: ${{ secrets.REACT_APP_AUTH_DOMAIN }}
           REACT_APP_AUTH_CLIENT: ${{ secrets.REACT_APP_AUTH_CLIENT }}
-          REACT_APP_HOST: ${{ secrets.REACT_APP_HOST }} 
+          REACT_APP_HOST: ${{ secrets.REACT_APP_HOST }}
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
