@@ -13,6 +13,8 @@ const timeoutPromise = (timeout) =>
   new Promise((_, reject) => setTimeout(() => reject(new Error('Request timed out')), timeout));
 
 const isDatabaseActive = async () => {
+  console.log(apiHostName);
+  console.log(process.env);
   const timeout = 2000;
   try {
     const response = await Promise.race([
