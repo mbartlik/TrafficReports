@@ -68,6 +68,7 @@ const getRouteInfo = async (startLat, startLng, endLat, endLng) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ start_lat: startLat, start_lng: startLng, end_lat: endLat, end_lng: endLng }),
     });
+    console.log(response);
     return await handleResponse(response);
   } catch (error) {
     console.error("Error fetching route information:", error.message);

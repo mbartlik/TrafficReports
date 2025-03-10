@@ -34,12 +34,19 @@ def get_database_status(conn):
         print(f"Error retrieving database status: {e}")
         return None
 
-def get_tracked_routes(conn, user_id):
-    """Retrieves tracked routes from the TrackedRoutes table for a specific user."""
+def get_tracked_routes(conn, user_id=None):
+    """Retrieves tracked routes from the TrackedRoutes table. If user_id is provided, filters by user_id."""
     try:
-        # Define the query to select all routes for the given user
-        query = "SELECT * FROM TrackedRoutes WHERE UserId = ? ORDER BY DateCreated"
-        params = [user_id]
+        # Define the base query
+        query = "SELECT * FROM TrackedRoutes"
+        params = []
+
+        # Add filtering by user_id if provided
+        if user_id:
+            query += " WHERE UserId = ?"
+            params.append(user_id)
+
+        query += " ORDER BY DateCreated"
 
         cursor = conn.cursor()
         cursor.execute(query, params)
@@ -92,6 +99,30 @@ def delete_tracked_route(conn, route_id, user_id):
     except Exception as e:
         print(f"Error deleting tracked route: {e}")
         return False
+    
+def upload_route_data(conn, route_data_list):
+    """Uploads route data to the RouteData table."""
+    try:
+        query = """
+        INSERT INTO RouteData (Id, Duration, Distance, Time)
+        VALUES (?, ?, ?, ?)
+        """
+        cursor = conn.cursor()
+
+        for route_data in route_data_list:
+            params = [
+                route_data['id'],
+                route_data['duration'],
+                route_data['distance'],
+                route_data['time']
+            ]
+            cursor.execute(query, params)
+
+        conn.commit()
+        return True  # Returns True if all rows were inserted successfully
+    except Exception as e:
+        print(f"Error uploading route data: {e}")
+        return False
 
 
 # CREATE TABLE TrackedRoutes (
@@ -105,4 +136,11 @@ def delete_tracked_route(conn, route_id, user_id):
 #     EndLatitude FLOAT NOT NULL,
 #     EndLongitude FLOAT NOT NULL,
 #     Frequency INT NOT NULL
+# );
+
+# CREATE TABLE RouteData (
+#     Id INT,
+#     Duration INT,
+#     Distance FLOAT,
+#     Time DATETIME
 # );

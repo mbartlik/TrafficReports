@@ -50,7 +50,7 @@ const RouteDetails = ({ route, onBack, userId, onDelete }) => {
   };
 
   const convertDurationStringToTime = (durationString) => {
-    const seconds = parseInt(durationString.replace('s', ''), 10);
+    const seconds = parseInt(durationString, 10);
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const remainingSeconds = seconds % 60;

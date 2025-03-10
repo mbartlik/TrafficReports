@@ -41,7 +41,7 @@ def is_db_active():
 @app.route('/get_tracked_routes', methods=['POST'])
 def get_tracked_routes_endpoint():
     data = request.json
-    user_id = data.get('userId', {})
+    user_id = data.get('userId')
 
     with sql_helper.get_conn() as conn:
         try:
@@ -80,31 +80,15 @@ def autocomplete_address_endpoint():
         print(e)
         return jsonify({"error": str(e)}), 500
 
-@app.route('/get_route_info', methods=['POST'])
-def get_route_info_endpoint():
-    data = request.json
-    print(data)
-    
-    # Extract latitude and longitude for start and end points
-    start_lat = data.get('start_lat', None)
-    start_lng = data.get('start_lng', None)
-    end_lat = data.get('end_lat', None)
-    end_lng = data.get('end_lng', None)
-    # waypoints = data.get('waypoints', [])  # Optional waypoints
-
-    # Validate if all required coordinates are provided
-    if not start_lat or not start_lng or not end_lat or not end_lng:
-        return jsonify({"error": "Latitude and longitude for both start and end are required"}), 400
-
+def get_route_info(start_lat, start_lng, end_lat, end_lng):
     try:
         api_key = os.getenv("GOOGLE_MAPS_API_KEY")
         if not api_key:
-            return jsonify({"error": "Google Maps API key is missing"}), 500
+            raise ValueError("Google Maps API key is missing")
 
         # Build the request body
         origin = {"location": {"latLng": {"latitude": start_lat, "longitude": start_lng}}}
         destination = {"location": {"latLng": {"latitude": end_lat, "longitude": end_lng}}}
-        # waypoints_list = [{"location": {"latLng": {"latitude": wp['lat'], "longitude": wp['lng']}}} for wp in waypoints]
 
         request_body = {
             "origin": origin,
@@ -120,39 +104,59 @@ def get_route_info_endpoint():
         # Construct the URL for route calculation
         url = "https://routes.googleapis.com/directions/v2:computeRoutes"
 
-        # Debugging: print the request body to ensure it's correct
-        print(f"Requesting route from Google Maps: {url}")
-        print(f"Request body: {request_body}")
-
         headers = {
             'Content-Type': 'application/json',
             'X-Goog-Api-Key': api_key,
             'X-Goog-FieldMask': 'routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline'
         }
 
-        try:
-            response = requests.post(url, json=request_body, headers=headers)
-            print(response.json())
-            response.raise_for_status()  # This will raise an exception for non-2xx status codes
-        except requests.exceptions.RequestException as e:
-            print(f"Request failed: {e}")
-            return jsonify({"error": "Failed to fetch route information"}), 500
+        response = requests.post(url, json=request_body, headers=headers)
+        response.raise_for_status()  # This will raise an exception for non-2xx status codes
 
         # Check if the response is valid
         route_info = response.json()
 
         # Check if a route was found
         if not route_info.get('routes'):
-            return jsonify({"error": "No route found between the given points"}), 404
+            raise ValueError("No route found between the given points")
+
+        # Convert duration from string to int seconds
+        for route in route_info['routes']:
+            if 'duration' in route:
+                duration_str = route['duration']
+                if duration_str.endswith('s'):
+                    route['duration'] = int(duration_str[:-1])
 
         # Return the first route information
-        return jsonify(route_info['routes'][0]), 200
+        return route_info['routes'][0]
 
     except Exception as e:
         print(e)
+        raise
+
+@app.route('/get_route_info', methods=['POST'])
+def get_route_info_endpoint():
+    data = request.json
+    
+    # Extract latitude and longitude for start and end points
+    start_lat = data.get('start_lat', None)
+    start_lng = data.get('start_lng', None)
+    end_lat = data.get('end_lat', None)
+    end_lng = data.get('end_lng', None)
+
+    # Validate if all required coordinates are provided
+    if not start_lat or not start_lng or not end_lat or not end_lng:
+        return jsonify({"error": "Latitude and longitude for both start and end are required"}), 400
+
+    try:
+        route_info = get_route_info(start_lat, start_lng, end_lat, end_lng)
+        return jsonify(route_info), 200
+
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 404
+    except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-    
 @app.route('/create_route', methods=['POST'])
 def create_route_endpoint():
     data = request.json
@@ -209,6 +213,70 @@ def delete_route_endpoint():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/upload_route_data', methods=['POST'])
+def upload_route_data_endpoint():
+    data = request.json
+    try:
+        route_data_list = data.get('routeDataList')
+        if not route_data_list:
+            return jsonify({"error": "Missing route data list"}), 400
+
+        with sql_helper.get_conn() as conn:
+            result = sql_helper.upload_route_data(conn, route_data_list)
+
+            if not result:
+                return jsonify({"error": "Failed to upload route data"}), 500
+
+            return jsonify({"message": "Route data uploaded successfully"}), 201
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/run_route_calculations', methods=['POST'])
+def run_route_calculations():
+    try:
+        # Get the list of tracked routes
+        with sql_helper.get_conn() as conn:
+            routes = sql_helper.get_tracked_routes(conn)
+            if routes is None:
+                return jsonify({"error": "Failed to fetch routes"}), 500
+        
+        # Get the current time rounded to the nearest full minute
+        now = datetime.utcnow()
+        start_time = now.replace(second=0, microsecond=0)
+
+        # Prepare the results list
+        results = []
+
+        for route in routes:
+            route_info = get_route_info(
+                route["StartLatitude"],
+                route["StartLongitude"],
+                route["EndLatitude"],
+                route["EndLongitude"]
+            )
+            result = {
+                "id": route["Id"],
+                "duration": route_info["duration"],
+                "distance": route_info["distanceMeters"],
+                "time": start_time.strftime("%Y-%m-%d %H:%M:%S")
+            }
+            results.append(result)
+
+        # Upload the results list
+        with sql_helper.get_conn() as conn:
+            result = sql_helper.upload_route_data(conn, results)
+            if not result:
+                return jsonify({"error": "Failed to upload route data"}), 500
+
+        return jsonify({"message": "Route calculations run successfully"}), 200
+
+    except requests.exceptions.RequestException as e:
+        print(f"API request failed: {e}")
+        return jsonify({"error": f"API request failed: {e}"}), 500
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return jsonify({"error": f"An error occurred: {e}"}), 500
 
 # Define the ping endpoint
 @app.route('/')
