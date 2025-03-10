@@ -47,9 +47,79 @@ const getTrackedRoutes = async (userId) => {
   }
 };
 
+const autocompleteAddress = async (query) => {
+  try {
+    const response = await fetch(`${apiHostName}/autocomplete_address`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query }),
+    });
+    return await handleResponse(response);
+  } catch (error) {
+    console.error("Error fetching autocomplete:", error.message);
+    throw error;
+  }
+};
+
+const getRouteInfo = async (startLat, startLng, endLat, endLng) => {
+  try {
+    const response = await fetch(`${apiHostName}/get_route_info`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ start_lat: startLat, start_lng: startLng, end_lat: endLat, end_lng: endLng }),
+    });
+    return await handleResponse(response);
+  } catch (error) {
+    console.error("Error fetching route information:", error.message);
+    throw error;
+  }
+};
+
+const createRoute = async (start, destination, userId) => {
+  try {
+    console.log(start);
+    const response = await fetch(`${apiHostName}/create_route`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        startLocationAddress: start.address?.freeformAddress,
+        startLatitude: start.position?.lat,
+        startLongitude: start.position?.lon,
+        endLocationAddress: destination.address?.freeformAddress,
+        endLatitude: destination.position?.lat,
+        endLongitude: destination.position?.lon,
+        userId
+      }),
+    });
+
+    return await handleResponse(response);
+  } catch (error) {
+    console.error("Error creating route:", error.message);
+    throw error;
+  }
+};
+
+const deleteRoute = async (routeId, userId) => {
+  try {
+    const response = await fetch(`${apiHostName}/delete_route`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ routeId, userId }),
+    });
+    return await handleResponse(response);
+  } catch (error) {
+    console.error("Error deleting route:", error.message);
+    throw error;
+  }
+};
+
 const apiService = {
   getTrackedRoutes,
-  isDatabaseActive
+  isDatabaseActive,
+  autocompleteAddress,
+  createRoute,
+  getRouteInfo,
+  deleteRoute,
 };
 
 export default apiService;

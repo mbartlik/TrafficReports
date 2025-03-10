@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styles from '../styles';
 import LoadingSpinner from './loadingSpinner';
+import RouteDetails from './routeDetails';
 
-const Home = ({ routes, loading, isMobile, isDbActive, isAuthenticated }) => {
+const Home = ({ routes, setRoutes, loading, isMobile, isDbActive, isAuthenticated, userId }) => {
+  const [selectedRoute, setSelectedRoute] = useState(null);
+
   if (!isDbActive) {
     return <h2>The database is currently unavailable. Please try again later.</h2>;
   }
@@ -16,28 +19,34 @@ const Home = ({ routes, loading, isMobile, isDbActive, isAuthenticated }) => {
     );
   }
 
+  const handleDelete = (routeId) => {
+    setRoutes(routes.filter(route => route.Id !== routeId));
+  };
+
   return (
     <div>
       {loading ? (
         <LoadingSpinner />
       ) : (
         <section>
-          {routes.length > 0 ? (
+          {selectedRoute ? (
+            <RouteDetails 
+              route={selectedRoute} 
+              onBack={() => setSelectedRoute(null)} 
+              userId={userId} 
+              onDelete={handleDelete} 
+            />
+          ) : (
             <>
               <h2 style={isMobile ? styles.mobileHeader : {}}>Tracked Routes</h2>
               <ul style={isMobile ? styles.mobileList : {}}>
                 {routes.map((route) => (
-                  <li key={route.id}>
-                    {/* Add a link or any other details about the route */}
-                    {route.StartLocation} to {route.EndLocation} - Frequency: {route.Frequency}
+                  <li key={route.Id}>
+                    {route.StartLocationAddress} -> {route.EndLocationAddress} 
+                    <button onClick={() => setSelectedRoute(route)}>View</button>
                   </li>
                 ))}
               </ul>
-            </>
-          ) : (
-            <>
-              <h2>You are not currently tracking any routes.</h2>
-              <p>Click <strong>"Track a new route"</strong> to start tracking your routes.</p>
             </>
           )}
         </section>

@@ -3,6 +3,7 @@ import { useAuth0 } from '@auth0/auth0-react';
 import Navbar from "./components/navbar";
 import Home from "./components/home";
 import About from './components/about';
+import NewRoute from './components/newRoute';
 import apiService from './apiService';
 import styles from './styles';
 import {
@@ -20,6 +21,23 @@ function App() {
   const [overlayMessage, setOverlayMessage] = useState(
     "Database is currently paused. Sorry, this is a hobby project. Please wait a minute or two..."
   );
+
+  const fetchTrackedRoutes = async () => {
+    setLoading(true);
+    try {
+      console.log(user);
+      const routesList = await apiService.getTrackedRoutes(user.sub);
+      if (!routesList) {
+        throw new Error('Routes list is null');
+      }
+      setRoutes(routesList);
+    } catch (error) {
+      console.error('Error fetching routes:', error);
+      setRoutes([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     let interval;
@@ -64,26 +82,16 @@ function App() {
 
   useEffect(() => {
     if (isDbActive && isAuthenticated && user) {
-      const fetchTrackedRoutes = async () => {
-        setLoading(true);
-        try {
-          console.log(user);
-          const routesList = await apiService.getTrackedRoutes(user.sub);
-          if (!routesList) {
-            throw new Error('Routes list is null');
-          }
-          setRoutes(routesList);
-        } catch (error) {
-          console.error('Error fetching routes:', error);
-          setRoutes([]);
-        } finally {
-          setLoading(false);
-        }
-      };
-
       fetchTrackedRoutes();
     }
   }, [isDbActive, user, isAuthenticated]);
+
+  const onClickHome = () => {
+    setRoutes(null);
+    if (isDbActive && isAuthenticated && user) {
+      fetchTrackedRoutes();
+    }
+  }
 
   return (
     <Router>
@@ -94,11 +102,12 @@ function App() {
         </div>
       )}
 
-      <Navbar isMobile={isMobile} />
+      <Navbar isMobile={isMobile} onClickHome={onClickHome}/>
       <div style={{ ...styles.body, ...(isMobile ? styles.bodyMobile : {}) }}>
         <Routes>
-          <Route path="/" element={<Home routes={routes} loading={loading && isDbActive} isMobile={isMobile} isDbActive={isDbActive} isAuthenticated={isAuthenticated} />} />
+          <Route path="/" element={<Home routes={routes} setRoutes={setRoutes} loading={loading && isDbActive} isMobile={isMobile} isDbActive={isDbActive} isAuthenticated={isAuthenticated} userId={user?.sub} />} />
           <Route path="/about" element={<About isMobile={isMobile} />} />
+          <Route path="/track-new-route" element={<NewRoute isMobile={isMobile} userId={user?.sub} isAuthenticated={isAuthenticated} />} />
           {/* Add a fallback 404 route */}
           <Route path="*" element={<h2>404 - Page Not Found</h2>} />
         </Routes>
