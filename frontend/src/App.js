@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import Navbar from "./components/navbar";
 import Home from "./components/home";
@@ -22,7 +22,7 @@ function App() {
     "Database is currently paused. Sorry, this is a hobby project. Please wait a minute or two..."
   );
 
-  const fetchTrackedRoutes = async () => {
+  const fetchTrackedRoutes = useCallback(async () => {
     setLoading(true);
     try {
       console.log(user);
@@ -37,7 +37,7 @@ function App() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     let interval;
