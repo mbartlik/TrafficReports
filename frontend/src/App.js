@@ -84,7 +84,7 @@ function App() {
     if (isDbActive && isAuthenticated && user) {
       fetchTrackedRoutes();
     }
-  }, [isDbActive, user, isAuthenticated]);
+  }, [isDbActive, user, isAuthenticated, fetchTrackedRoutes]);
 
   const onClickHome = () => {
     setRoutes(null);
