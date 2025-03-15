@@ -3,12 +3,13 @@ import apiService from '../apiService';
 import LoadingSpinner from './loadingSpinner';
 
 const RouteDetails = ({ route, onBack, userId, onDelete }) => {
-  const [routeDirectionalInfo, setRouteDirectionalInfo] = useState(null);
+  const [currentRouteDirectionalInfo, setcurrentRouteDirectionalInfo] = useState(null);
+  const [routeData, setRouteData] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteSuccess, setDeleteSuccess] = useState(false);
 
   useEffect(() => {
-    const fetchRouteDirectionalInfo = async () => {
+    const fetchCurrentRouteDirectionalInfo = async () => {
       try {
         const routeInfo = await apiService.getRouteInfo(
           route.StartLatitude, 
@@ -16,15 +17,24 @@ const RouteDetails = ({ route, onBack, userId, onDelete }) => {
           route.EndLatitude, 
           route.EndLongitude
         );
-        console.log(routeInfo);
-        setRouteDirectionalInfo(routeInfo);
+        setcurrentRouteDirectionalInfo(routeInfo);
       } catch (error) {
         console.error("Error fetching route info:", error.message);
       }
     };
 
+    const fetchRouteData = async () => {
+      try {
+        const data = await apiService.getRouteData(route.Id);
+        setRouteData(data);
+      } catch (error) {
+        console.error("Error fetching route data:", error.message);
+      }
+    };
+
     if (route && route.StartLatitude && route.StartLongitude && route.EndLatitude && route.EndLongitude) {
-      fetchRouteDirectionalInfo();
+      fetchCurrentRouteDirectionalInfo();
+      fetchRouteData();
     }
   }, [route]);
 
@@ -45,7 +55,6 @@ const RouteDetails = ({ route, onBack, userId, onDelete }) => {
   };
 
   const convertMetersToMiles = (meters) => {
-    console.log(meters);
     return (meters / 1609.34).toFixed(2);
   };
 
@@ -67,6 +76,14 @@ const RouteDetails = ({ route, onBack, userId, onDelete }) => {
     return timeString.trim();
   };
 
+  const convertToUserTimezone = (gmtTime) => {
+    const date = new Date(gmtTime);
+    return date.toLocaleString('en-US', {
+      timeZoneName: 'short',
+      hour12: true,
+    });
+  };
+
   return (
     <div>
       {isDeleting && <LoadingSpinner />}
@@ -75,21 +92,27 @@ const RouteDetails = ({ route, onBack, userId, onDelete }) => {
           <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
             ← Back
           </button>
-          <div>
-            <h2>Route Details</h2>
-            <p>Start Location: {route.StartLocationAddress}</p>
-            <p>End Location: {route.EndLocationAddress}</p>
-            <button onClick={handleDelete} style={{ background: 'red', color: 'white', border: 'none', cursor: 'pointer' }}>
-              Delete Route
-            </button>
-          </div>
-          {routeDirectionalInfo && (
+          {currentRouteDirectionalInfo && routeData ? (
             <div>
-              <h3>Directional Info</h3>
-              <p>Distance: {convertMetersToMiles(routeDirectionalInfo.distanceMeters)} miles</p>
-              <p>Duration: {convertDurationStringToTime(routeDirectionalInfo.duration)}</p>
+              <h2>{route.Name ? route.Name : "Route Details"}</h2>
+              <p>Start Location: {route.StartLocationAddress}</p>
+              <p>End Location: {route.EndLocationAddress}</p>
+              <p>Distance: {convertMetersToMiles(currentRouteDirectionalInfo.distanceMeters)} miles</p>
+              <p>Current Duration: {convertDurationStringToTime(currentRouteDirectionalInfo.duration)}</p>
+              <button onClick={handleDelete} style={{ background: 'red', color: 'white', border: 'none', cursor: 'pointer' }}>
+                Delete Route
+              </button>
+              <h3>Route Data Over Time</h3>
+              <ul>
+                {routeData.map((data, index) => (
+                  <li key={index}>
+                    <p>Duration: {convertDurationStringToTime(data.Duration)}</p>
+                    <p>Time: {convertToUserTimezone(data.Time)}</p>
+                  </li>
+                ))}
+              </ul>
             </div>
-          )}
+          ) : <LoadingSpinner />}
         </>
       )}
       {deleteSuccess && (

@@ -13,8 +13,6 @@ const timeoutPromise = (timeout) =>
   new Promise((_, reject) => setTimeout(() => reject(new Error('Request timed out')), timeout));
 
 const isDatabaseActive = async () => {
-  console.log(apiHostName);
-  console.log(process.env);
   const timeout = 2000;
   try {
     const response = await Promise.race([
@@ -24,7 +22,6 @@ const isDatabaseActive = async () => {
       }),
       timeoutPromise(timeout),
     ]);
-    console.log(response);
     const result = await handleResponse(response);
     return result.isActive;
   } catch (error) {
@@ -68,7 +65,6 @@ const getRouteInfo = async (startLat, startLng, endLat, endLng) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ start_lat: startLat, start_lng: startLng, end_lat: endLat, end_lng: endLng }),
     });
-    console.log(response);
     return await handleResponse(response);
   } catch (error) {
     console.error("Error fetching route information:", error.message);
@@ -76,9 +72,22 @@ const getRouteInfo = async (startLat, startLng, endLat, endLng) => {
   }
 };
 
-const createRoute = async (start, destination, userId) => {
+const getRouteData = async (routeId) => {
   try {
-    console.log(start);
+    const response = await fetch(`${apiHostName}/get_route_data`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ routeId }),
+    });
+    return await handleResponse(response);
+  } catch (error) {
+    console.error("Error fetching route data:", error.message);
+    throw error;
+  }
+};
+
+const createRoute = async (start, destination, userId, name) => {
+  try {
     const response = await fetch(`${apiHostName}/create_route`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -89,7 +98,8 @@ const createRoute = async (start, destination, userId) => {
         endLocationAddress: destination.address?.freeformAddress,
         endLatitude: destination.position?.lat,
         endLongitude: destination.position?.lon,
-        userId
+        userId,
+        name
       }),
     });
 
@@ -120,6 +130,7 @@ const apiService = {
   autocompleteAddress,
   createRoute,
   getRouteInfo,
+  getRouteData,
   deleteRoute,
 };
 

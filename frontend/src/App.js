@@ -25,7 +25,6 @@ function App() {
   const fetchTrackedRoutes = useCallback(async () => {
     setLoading(true);
     try {
-      console.log(user);
       const routesList = await apiService.getTrackedRoutes(user.sub);
       if (!routesList) {
         throw new Error('Routes list is null');

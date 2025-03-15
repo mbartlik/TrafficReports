@@ -1,13 +1,23 @@
 import React, { useState, useEffect, useRef } from "react";
 import apiService from "../apiService";
 
-const AutocompleteInput = ({ onAddressSelected }) => {
+const AutocompleteInput = ({ onAddressSelected, clearInput }) => {
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [shouldFetch, setShouldFetch] = useState(true);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const inputRef = useRef(null);
   const suggestionsRef = useRef(null);
+
+  // Clear input when clearInput prop changes
+  useEffect(() => {
+    if (clearInput) {
+      setQuery("");
+      setSuggestions([]);
+      setShouldFetch(false);
+      setSelectedIndex(-1);
+    }
+  }, [clearInput]);
 
   // Fetch suggestions with debounce (avoiding too many API calls)
   useEffect(() => {

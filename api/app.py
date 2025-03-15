@@ -168,6 +168,7 @@ def create_route_endpoint():
         end_latitude = data.get('endLatitude')
         end_longitude = data.get('endLongitude')
         user_id = data.get('userId')
+        name = data.get('name')
 
         if not all([start_address, start_latitude, start_longitude, end_address, end_latitude, end_longitude]):
             return jsonify({"error": "Missing required fields"}), 400
@@ -181,7 +182,8 @@ def create_route_endpoint():
                 end_address,
                 end_latitude,
                 end_longitude,
-                user_id
+                user_id,
+                name
             )
 
             if not result:
@@ -209,6 +211,25 @@ def delete_route_endpoint():
                 return jsonify({"error": "Failed to delete route"}), 500
 
             return jsonify({"message": "Route deleted successfully"}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/get_route_data', methods=['POST'])
+def get_route_data_endpoint():
+    data = request.json
+    route_id = data.get('routeId')
+
+    if not route_id:
+        return jsonify({"error": "Missing route ID"}), 400
+
+    try:
+        with sql_helper.get_conn() as conn:
+            route_data = sql_helper.get_route_data(conn, route_id)
+            if route_data is None:
+                return jsonify({"error": "Failed to fetch route data"}), 500
+
+            return jsonify(route_data), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500

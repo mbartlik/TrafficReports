@@ -42,7 +42,7 @@ const Home = ({ routes, setRoutes, loading, isMobile, isDbActive, isAuthenticate
               <ul style={isMobile ? styles.mobileList : {}}>
                 {routes.map((route) => (
                   <li key={route.Id}>
-                    {route.StartLocationAddress} -> {route.EndLocationAddress} 
+                    {route.Name ?? `${route.StartLocationAddress} -> ${route.EndLocationAddress}`} 
                     <button onClick={() => setSelectedRoute(route)}>View</button>
                   </li>
                 ))}

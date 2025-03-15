@@ -66,15 +66,15 @@ def get_tracked_routes(conn, user_id=None):
         print(f"Error retrieving tracked routes: {e}")
         return None
     
-def create_tracked_route(conn, start_address, start_latitude, start_longitude, end_address, end_latitude, end_longitude, user_id):
+def create_tracked_route(conn, start_address, start_latitude, start_longitude, end_address, end_latitude, end_longitude, user_id, name):
     """Inserts a new tracked route into the TrackedRoutes table."""
     try:
         query = """
         INSERT INTO TrackedRoutes 
-        (UserId, StartLocationAddress, StartLatitude, StartLongitude, EndLocationAddress, EndLatitude, EndLongitude, DateCreated, Frequency) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, GETDATE(), 1)
+        (UserId, StartLocationAddress, StartLatitude, StartLongitude, EndLocationAddress, EndLatitude, EndLongitude, DateCreated, Frequency, Name) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, GETDATE(), 1, ?)
         """
-        params = [user_id, start_address, start_latitude, start_longitude, end_address, end_latitude, end_longitude]  # Placeholder UserId (adjust as needed)
+        params = [user_id, start_address, start_latitude, start_longitude, end_address, end_latitude, end_longitude, name]  # Placeholder UserId (adjust as needed)
 
         cursor = conn.cursor()
         cursor.execute(query, params)
@@ -86,20 +86,28 @@ def create_tracked_route(conn, start_address, start_latitude, start_longitude, e
         return False
     
 def delete_tracked_route(conn, route_id, user_id):
-    """Deletes a tracked route from the TrackedRoutes table for a specific user."""
+    """Deletes a tracked route from the TrackedRoutes table for a specific user and from the RouteData table."""
     try:
-        query = "DELETE FROM TrackedRoutes WHERE Id = ? AND UserId = ?"
-        params = [route_id, user_id]
+        # Delete from TrackedRoutes table
+        query_tracked_routes = "DELETE FROM TrackedRoutes WHERE Id = ? AND UserId = ?"
+        params_tracked_routes = [route_id, user_id]
 
         cursor = conn.cursor()
-        cursor.execute(query, params)
+        cursor.execute(query_tracked_routes, params_tracked_routes)
+
+        # Delete from RouteData table
+        query_route_data = "DELETE FROM RouteData WHERE Id = ?"
+        params_route_data = [route_id]
+
+        cursor.execute(query_route_data, params_route_data)
+
         conn.commit()
 
         return cursor.rowcount > 0  # Returns True if a row was deleted successfully
     except Exception as e:
         print(f"Error deleting tracked route: {e}")
         return False
-    
+
 def upload_route_data(conn, route_data_list):
     """Uploads route data to the RouteData table."""
     try:
@@ -124,9 +132,34 @@ def upload_route_data(conn, route_data_list):
         print(f"Error uploading route data: {e}")
         return False
 
+def get_route_data(conn, route_id):
+    """Retrieves route data from the RouteData table for a specific route ID."""
+    try:
+        query = "SELECT * FROM RouteData WHERE Id = ? ORDER BY Time DESC"
+        params = [route_id]
+
+        cursor = conn.cursor()
+        cursor.execute(query, params)
+
+        # Fetch all results
+        results = cursor.fetchall()
+
+        # Convert results to a list of dictionaries for easy handling
+        route_data = []
+        columns = [column[0] for column in cursor.description]
+        for row in results:
+            data = dict(zip(columns, row))
+            route_data.append(data)
+
+        return route_data
+    except Exception as e:
+        print(f"Error retrieving route data: {e}")
+        return None
+
 
 # CREATE TABLE TrackedRoutes (
 #     Id INT IDENTITY(1,1) PRIMARY KEY,
+#     Name NVARCHAR(255) NOT NULL,
 #     UserId NVARCHAR(255) NOT NULL,
 #     DateCreated DATETIME DEFAULT GETDATE(),
 #     StartLocationAddress NVARCHAR(255) NOT NULL,
