@@ -20,6 +20,8 @@ const Home = ({ routes, setRoutes, loading, isMobile, isDbActive, isAuthenticate
   }
 
   const handleDelete = (routeId) => {
+    console.log("delete route", routeId);
+    setSelectedRoute(null);
     setRoutes(routes.filter(route => route.Id !== routeId));
   };
 

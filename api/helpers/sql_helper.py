@@ -95,6 +95,11 @@ def delete_tracked_route(conn, route_id, user_id):
         cursor = conn.cursor()
         cursor.execute(query_tracked_routes, params_tracked_routes)
 
+        # Check if a row was deleted from TrackedRoutes
+        if cursor.rowcount == 0:
+            conn.rollback()
+            return False
+
         # Delete from RouteData table
         query_route_data = "DELETE FROM RouteData WHERE Id = ?"
         params_route_data = [route_id]
@@ -103,9 +108,10 @@ def delete_tracked_route(conn, route_id, user_id):
 
         conn.commit()
 
-        return cursor.rowcount > 0  # Returns True if a row was deleted successfully
+        return True  # Returns True if a row was deleted from TrackedRoutes
     except Exception as e:
         print(f"Error deleting tracked route: {e}")
+        conn.rollback()
         return False
 
 def upload_route_data(conn, route_data_list):
@@ -135,7 +141,7 @@ def upload_route_data(conn, route_data_list):
 def get_route_data(conn, route_id):
     """Retrieves route data from the RouteData table for a specific route ID."""
     try:
-        query = "SELECT * FROM RouteData WHERE Id = ? ORDER BY Time DESC"
+        query = "SELECT * FROM RouteData WHERE Id = ? ORDER BY Time"
         params = [route_id]
 
         cursor = conn.cursor()

@@ -57,7 +57,7 @@ const NewRoute = (props) => {
       <h2>Create a New Route</h2>
 
       {error && <p style={{ color: "red" }}>{error}</p>}
-      {success && <p style={{ color: "green", fontWeight: "bold" }}>Route successfully created!</p>}
+      {success && <p style={{ color: "green", fontWeight: "bold" }}>Route successfully created! Go to the home page to view your route</p>}
 
       <input
         type="text"

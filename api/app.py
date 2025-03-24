@@ -82,35 +82,21 @@ def autocomplete_address_endpoint():
 
 def get_route_info(start_lat, start_lng, end_lat, end_lng):
     try:
-        api_key = os.getenv("GOOGLE_MAPS_API_KEY")
+        api_key = os.getenv("HERE_MAPS_API_KEY")
         if not api_key:
-            raise ValueError("Google Maps API key is missing")
-
-        # Build the request body
-        origin = {"location": {"latLng": {"latitude": start_lat, "longitude": start_lng}}}
-        destination = {"location": {"latLng": {"latitude": end_lat, "longitude": end_lng}}}
-
-        request_body = {
-            "origin": origin,
-            "destination": destination,
-            "travelMode": "DRIVE",
-            "routingPreference": "TRAFFIC_AWARE",
-            "computeAlternativeRoutes": False,
-            "routeModifiers": {"avoidTolls": False, "avoidHighways": False, "avoidFerries": False},
-            "languageCode": "en-US",
-            "units": "IMPERIAL"
-        }
+            raise ValueError("HERE Maps API key is missing")
 
         # Construct the URL for route calculation
-        url = "https://routes.googleapis.com/directions/v2:computeRoutes"
+        url = (
+            f"https://router.hereapi.com/v8/routes?"
+            f"transportMode=car&"
+            f"origin={start_lat},{start_lng}&"
+            f"destination={end_lat},{end_lng}&"
+            f"return=summary&"
+            f"apiKey={api_key}"
+        )
 
-        headers = {
-            'Content-Type': 'application/json',
-            'X-Goog-Api-Key': api_key,
-            'X-Goog-FieldMask': 'routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline'
-        }
-
-        response = requests.post(url, json=request_body, headers=headers)
+        response = requests.get(url)
         response.raise_for_status()  # This will raise an exception for non-2xx status codes
 
         # Check if the response is valid
@@ -120,20 +106,23 @@ def get_route_info(start_lat, start_lng, end_lat, end_lng):
         if not route_info.get('routes'):
             raise ValueError("No route found between the given points")
 
-        # Convert duration from string to int seconds
-        for route in route_info['routes']:
-            if 'duration' in route:
-                duration_str = route['duration']
-                if duration_str.endswith('s'):
-                    route['duration'] = int(duration_str[:-1])
+        # Extract the first route and its summary
+        route = route_info['routes'][0]
+        section = route['sections'][0]
+        summary = section['summary']
 
-        # Return the first route information
-        return route_info['routes'][0]
+        # Prepare the route information
+        route_data = {
+            'duration': summary['duration'],  # Duration in seconds
+            'distanceMeters': summary['length'],  # Distance in meters
+        }
+
+        return route_data
 
     except Exception as e:
         print(e)
-        raise
-
+        raise e
+    
 @app.route('/get_route_info', methods=['POST'])
 def get_route_info_endpoint():
     data = request.json

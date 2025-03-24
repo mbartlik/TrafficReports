@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import apiService from '../apiService';
 import LoadingSpinner from './loadingSpinner';
+import RouteDurationGraph from './routeDurationGraph';
 
 const RouteDetails = ({ route, onBack, userId, onDelete }) => {
   const [currentRouteDirectionalInfo, setcurrentRouteDirectionalInfo] = useState(null);
@@ -78,11 +79,36 @@ const RouteDetails = ({ route, onBack, userId, onDelete }) => {
 
   const convertToUserTimezone = (gmtTime) => {
     const date = new Date(gmtTime);
-    return date.toLocaleString('en-US', {
-      timeZoneName: 'short',
+    const localTimeString = date.toLocaleString('en-US', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: 'numeric',
+      minute: 'numeric',
       hour12: true,
     });
+  
+    // Remove the timezone part (e.g., "GMT", "PST", etc.) but keep the AM/PM part
+    const parts = localTimeString.split(' ');
+    return parts.slice(0, -1).join(' ') + ' ' + parts[parts.length - 1];
   };
+
+  const calculateStats = (data) => {
+    if (!data || data.length === 0) return { mean: 0, min: 0, max: 0, minTime: null, maxTime: null };
+  
+    const durations = data.map(d => parseInt(d.Duration, 10));
+    const total = durations.reduce((acc, curr) => acc + curr, 0);
+    const mean = total / durations.length;
+    const min = Math.min(...durations);
+    const max = Math.max(...durations);
+  
+    const minTime = data[durations.indexOf(min)].Time;
+    const maxTime = data[durations.indexOf(max)].Time;
+  
+    return { mean, min, max, minTime, maxTime };
+  };
+
+  const stats = calculateStats(routeData);
 
   return (
     <div>
@@ -94,23 +120,27 @@ const RouteDetails = ({ route, onBack, userId, onDelete }) => {
           </button>
           {currentRouteDirectionalInfo && routeData ? (
             <div>
-              <h2>{route.Name ? route.Name : "Route Details"}</h2>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h2>{route.Name ? route.Name : "Route Details"}</h2>
+                <button onClick={handleDelete} style={{ background: 'red', color: 'white', border: 'none', cursor: 'pointer' }}>
+                  Delete Route
+                </button>
+              </div>
               <p>Start Location: {route.StartLocationAddress}</p>
               <p>End Location: {route.EndLocationAddress}</p>
               <p>Distance: {convertMetersToMiles(currentRouteDirectionalInfo.distanceMeters)} miles</p>
               <p>Current Duration: {convertDurationStringToTime(currentRouteDirectionalInfo.duration)}</p>
-              <button onClick={handleDelete} style={{ background: 'red', color: 'white', border: 'none', cursor: 'pointer' }}>
-                Delete Route
-              </button>
-              <h3>Route Data Over Time</h3>
-              <ul>
-                {routeData.map((data, index) => (
-                  <li key={index}>
-                    <p>Duration: {convertDurationStringToTime(data.Duration)}</p>
-                    <p>Time: {convertToUserTimezone(data.Time)}</p>
-                  </li>
-                ))}
-              </ul>
+              {routeData.length > 0 ? (
+                <>
+                  <p>Mean Duration: {convertDurationStringToTime(stats.mean.toString())}</p>
+                  <p>Min Duration: {convertDurationStringToTime(stats.min.toString())} - {convertToUserTimezone(stats.minTime)}</p>
+                  <p>Max Duration: {convertDurationStringToTime(stats.max.toString())} - {convertToUserTimezone(stats.maxTime)}</p>
+                  <h3>Route Data Over Time</h3>
+                  <RouteDurationGraph routeData={routeData} convertDurationStringToTime={convertDurationStringToTime} convertToUserTimezone={convertToUserTimezone}/>
+                </>
+              ) : (
+                <p>We are now tracking this route. Come back soon to see duration over time.</p>
+              )}
             </div>
           ) : <LoadingSpinner />}
         </>
