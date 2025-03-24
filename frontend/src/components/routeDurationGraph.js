@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { format, subHours, subDays, startOfHour, addHours } from 'date-fns';
+import { subHours, subDays, startOfHour, addHours } from 'date-fns';
 
 const RouteDurationGraph = ({ routeData, convertDurationStringToTime, convertToUserTimezone }) => {
   const [filteredData, setFilteredData] = useState([]);
