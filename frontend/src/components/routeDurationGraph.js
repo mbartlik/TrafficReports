@@ -59,12 +59,13 @@ const RouteDurationGraph = ({ routeData, convertDurationStringToTime, convertToU
     const durations = filteredData.map(data => data.Duration);
     const minDuration = Math.min(...durations);
     const maxDuration = Math.max(...durations);
-    const tickValues = [];
-
-    for (let i = Math.ceil(minDuration / 60) * 60; i <= Math.floor(maxDuration / 60) * 60; i += 60) {
-      tickValues.push(i);
+    const tickValuesSet = new Set();
+  
+    for (let i = Math.floor(minDuration / 60); i <= Math.ceil(maxDuration / 60); i += 1) {
+      tickValuesSet.add(i*60);
     }
-
+  
+    const tickValues = Array.from(tickValuesSet);
     console.log('Y-Axis Tick Values:', tickValues);
     return tickValues;
   };

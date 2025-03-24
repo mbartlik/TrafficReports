@@ -175,10 +175,10 @@ def create_route_endpoint():
                 name
             )
 
-            if not result:
-                return jsonify({"error": "Failed to create route"}), 500
+            if not result['success']:
+                return jsonify({"error": result['message']}), 400 if result['message'] == "You have already created the maximum 2 routes. Delete one to create a new one." else 500
 
-            return jsonify({"message": "Route created successfully"}), 201
+            return jsonify({"message": result['message']}), 201
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500

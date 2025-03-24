@@ -30,7 +30,7 @@ const NewRoute = (props) => {
     setLoading(true);
 
     try {
-      await apiService.createRoute(start, destination, userId, routeName);
+      const response = await apiService.createRoute(start, destination, userId, routeName);
       setRouteName("");
       setStart(null);
       setDestination(null);
@@ -39,7 +39,11 @@ const NewRoute = (props) => {
       setTimeout(() => setClearInput(false), 100); // Reset clearInput after a short delay
     } catch (err) {
       console.error("Error creating route:", err);
-      setError("Failed to create route. Please try again.");
+      if (err.message?.includes("You have already")) {
+        setError(err.message);
+      } else {
+        setError("Failed to create route. Please try again.");
+      }
     } finally {
       setLoading(false);
     }

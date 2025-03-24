@@ -69,21 +69,26 @@ def get_tracked_routes(conn, user_id=None):
 def create_tracked_route(conn, start_address, start_latitude, start_longitude, end_address, end_latitude, end_longitude, user_id, name):
     """Inserts a new tracked route into the TrackedRoutes table."""
     try:
+        # Check if the user has already created 2 or more routes
+        routes = get_tracked_routes(conn, user_id)
+        if len(routes) >= 2:
+            return {"success": False, "message": "You have already created the maximum 2 routes. Delete one to create a new one."}
+
         query = """
         INSERT INTO TrackedRoutes 
         (UserId, StartLocationAddress, StartLatitude, StartLongitude, EndLocationAddress, EndLatitude, EndLongitude, DateCreated, Frequency, Name) 
         VALUES (?, ?, ?, ?, ?, ?, ?, GETDATE(), 1, ?)
         """
-        params = [user_id, start_address, start_latitude, start_longitude, end_address, end_latitude, end_longitude, name]  # Placeholder UserId (adjust as needed)
+        params = [user_id, start_address, start_latitude, start_longitude, end_address, end_latitude, end_longitude, name]
 
         cursor = conn.cursor()
         cursor.execute(query, params)
         conn.commit()
 
-        return cursor.rowcount > 0  # Returns True if a row was inserted successfully
+        return {"success": cursor.rowcount > 0, "message": "Route created successfully."}
     except Exception as e:
         print(f"Error inserting tracked route: {e}")
-        return False
+        return {"success": False, "message": "Error inserting tracked route."}
     
 def delete_tracked_route(conn, route_id, user_id):
     """Deletes a tracked route from the TrackedRoutes table for a specific user and from the RouteData table."""
