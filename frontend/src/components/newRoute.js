@@ -31,7 +31,7 @@ const NewRoute = (props) => {
     setLoading(true);
 
     try {
-      const response = await apiService.createRoute(start, destination, userId, routeName);
+      await apiService.createRoute(start, destination, userId, routeName);
       setRouteName("");
       setStart(null);
       setDestination(null);
