@@ -332,6 +332,27 @@ const styles = {
     zIndex: 1000, // Ensure it stays on top
     textAlign: "center",
   },
+  standardButton: {
+    padding: "5px 10px",
+    borderRadius: "3px",
+    border: "none",
+    cursor: "pointer",
+    textAlign: "center",
+    textDecoration: "none",
+    display: "inline-block",
+    fontSize: "14px",
+    backgroundColor: COLORS.text,
+    color: COLORS.accent
+  },
+  deleteButton: {
+    backgroundColor: COLORS.secondary,
+    color: COLORS.background,
+  },
+  clickableText: {
+    color: COLORS.text,
+    textDecoration: 'underline',
+    cursor: 'pointer',
+  }
 };
 
 export default styles;

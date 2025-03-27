@@ -18,6 +18,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [routes, setRoutes] = useState([]);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768); // Updated to 768px
+  const [selectedRoute, setSelectedRoute] = useState(null);
   const [overlayMessage, setOverlayMessage] = useState(
     "Database is currently paused. Sorry, this is a hobby project. Please wait a minute or two..."
   );
@@ -87,6 +88,7 @@ function App() {
 
   const onClickHome = () => {
     setRoutes(null);
+    setSelectedRoute(null);
     if (isDbActive && isAuthenticated && user) {
       fetchTrackedRoutes();
     }
@@ -104,7 +106,7 @@ function App() {
       <Navbar isMobile={isMobile} onClickHome={onClickHome}/>
       <div style={{ ...styles.body, ...(isMobile ? styles.bodyMobile : {}) }}>
         <Routes>
-          <Route path="/" element={<Home routes={routes} setRoutes={setRoutes} loading={loading && isDbActive} isMobile={isMobile} isDbActive={isDbActive} isAuthenticated={isAuthenticated} userId={user?.sub} />} />
+          <Route path="/" element={<Home routes={routes} setRoutes={setRoutes} loading={loading && isDbActive} isMobile={isMobile} isDbActive={isDbActive} isAuthenticated={isAuthenticated} userId={user?.sub} selectedRoute={selectedRoute} setSelectedRoute={setSelectedRoute} />} />
           <Route path="/about" element={<About isMobile={isMobile} />} />
           <Route path="/track-new-route" element={<NewRoute isMobile={isMobile} userId={user?.sub} isAuthenticated={isAuthenticated} />} />
           {/* Add a fallback 404 route */}

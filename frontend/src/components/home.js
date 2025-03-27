@@ -3,8 +3,7 @@ import styles from '../styles';
 import LoadingSpinner from './loadingSpinner';
 import RouteDetails from './routeDetails';
 
-const Home = ({ routes, setRoutes, loading, isMobile, isDbActive, isAuthenticated, userId }) => {
-  const [selectedRoute, setSelectedRoute] = useState(null);
+const Home = ({ routes, setRoutes, loading, isMobile, isDbActive, isAuthenticated, userId, selectedRoute, setSelectedRoute }) => {
 
   if (!isDbActive) {
     return <h2>The database is currently unavailable. Please try again later.</h2>;
@@ -43,9 +42,13 @@ const Home = ({ routes, setRoutes, loading, isMobile, isDbActive, isAuthenticate
               <h2 style={isMobile ? styles.mobileHeader : {}}>Tracked Routes</h2>
               <ul style={isMobile ? styles.mobileList : {}}>
                 {routes.map((route) => (
-                  <li key={route.Id}>
-                    {route.Name ?? `${route.StartLocationAddress} -> ${route.EndLocationAddress}`} 
-                    <button onClick={() => setSelectedRoute(route)}>View</button>
+                  <li key={route.Id} style={{ paddingBottom: '0.5rem', fontSize: '1.25rem'}}>
+                    <span 
+                      style={{ ...styles.clickableText }} 
+                      onClick={() => setSelectedRoute(route)}
+                    >
+                      {route.Name ?? `${route.StartLocationAddress} -> ${route.EndLocationAddress}`}
+                    </span>
                   </li>
                 ))}
               </ul>

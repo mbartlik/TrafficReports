@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import apiService from "../apiService";
 import AutocompleteInput from "./autocompleteInput";
 import LoadingSpinner from "./loadingSpinner";
+import styles from "../styles";
 
 const NewRoute = (props) => {
   const { userId, isAuthenticated } = props;
@@ -57,7 +58,7 @@ const NewRoute = (props) => {
   };
 
   return (
-    <div onKeyDown={handleKeyPress} tabIndex={0} style={{ textAlign: "center" }}>
+    <div onKeyDown={handleKeyPress} tabIndex={0} style={{ textAlign: "left" }}>
       <h2>Create a New Route</h2>
 
       {error && <p style={{ color: "red" }}>{error}</p>}
@@ -68,7 +69,7 @@ const NewRoute = (props) => {
         placeholder="Route Name"
         value={routeName}
         onChange={(e) => setRouteName(e.target.value)}
-        style={{ padding: "10px", fontSize: "16px", width: "80%", marginBottom: "10px" }}
+        style={{ padding: "10px", fontSize: "16px", width: "80%", marginBottom: "20px", maxWidth: '30rem' }}
       />
       <br />
 
@@ -85,7 +86,7 @@ const NewRoute = (props) => {
       />
       <br />
 
-      <button onClick={handleCreateRoute} disabled={loading} style={{ padding: "10px", fontSize: "16px" }}>
+      <button onClick={handleCreateRoute} disabled={loading} style={styles.standardButton}>
         {loading ? "Creating..." : "Create Route"}
       </button>
 
