@@ -101,7 +101,7 @@ const AutocompleteInput = ({ onAddressSelected, clearInput, isMobile }) => {
         ref={inputRef}
         onChange={handleInputChange}
         onKeyDown={handleKeyDown}
-        style={{ width: '85%', height: '1.5rem', maxWidth: '50rem' }} // Adjust width to accommodate longer addresses
+        style={{ width: '75%', height: '1.5rem', maxWidth: '50rem' }} // Adjust width to accommodate longer addresses
       />
       {suggestions.length > 0 && (
         <ul
