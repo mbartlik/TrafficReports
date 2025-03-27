@@ -69,7 +69,7 @@ const NewRoute = (props) => {
         placeholder="Route Name"
         value={routeName}
         onChange={(e) => setRouteName(e.target.value)}
-        style={{ padding: "10px", fontSize: "16px", width: "80%", marginBottom: "20px", maxWidth: '30rem', ...(isMobile ? { width: '100%' } : {}) }}
+        style={{ padding: "10px", fontSize: "16px", width: "70%", marginBottom: "20px", maxWidth: '30rem', ...(isMobile ? { width: '100%' } : {}) }}
       />
       <br />
 
