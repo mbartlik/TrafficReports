@@ -5,7 +5,7 @@ import LoadingSpinner from "./loadingSpinner";
 import styles from "../styles";
 
 const NewRoute = (props) => {
-  const { userId, isAuthenticated } = props;
+  const { userId, isAuthenticated, isMobile } = props;
   const [routeName, setRouteName] = useState("");
   const [start, setStart] = useState(null);
   const [destination, setDestination] = useState(null);
@@ -69,7 +69,7 @@ const NewRoute = (props) => {
         placeholder="Route Name"
         value={routeName}
         onChange={(e) => setRouteName(e.target.value)}
-        style={{ padding: "10px", fontSize: "16px", width: "80%", marginBottom: "20px", maxWidth: '30rem' }}
+        style={{ padding: "10px", fontSize: "16px", width: "80%", marginBottom: "20px", maxWidth: '30rem', ...(isMobile ? { width: '100%' } : {}) }}
       />
       <br />
 
@@ -77,12 +77,14 @@ const NewRoute = (props) => {
         apiKey={process.env.REACT_APP_AZURE_MAPS_API_KEY}
         onAddressSelected={(address) => setStart(address)}
         clearInput={clearInput}
+        isMobile={isMobile}
       />
       <br />
       <AutocompleteInput
         apiKey={process.env.REACT_APP_AZURE_MAPS_API_KEY}
         onAddressSelected={(address) => setDestination(address)}
         clearInput={clearInput}
+        isMobile={isMobile}
       />
       <br />
 

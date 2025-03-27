@@ -116,7 +116,8 @@ const RouteDurationGraph = ({ routeData, convertDurationStringToTime, convertToU
         color: filter === value ? 'white' : 'black',
         border: '1px solid black',
         cursor: 'pointer',
-        marginRight: '5px'
+        marginRight: '5px',
+        marginBottom: '5px'
       }}
     >
       {label}

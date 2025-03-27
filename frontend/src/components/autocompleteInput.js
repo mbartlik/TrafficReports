@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import apiService from "../apiService";
 
-const AutocompleteInput = ({ onAddressSelected, clearInput }) => {
+const AutocompleteInput = ({ onAddressSelected, clearInput, isMobile }) => {
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [shouldFetch, setShouldFetch] = useState(true);
@@ -101,7 +101,7 @@ const AutocompleteInput = ({ onAddressSelected, clearInput }) => {
         ref={inputRef}
         onChange={handleInputChange}
         onKeyDown={handleKeyDown}
-        style={{ width: '100%', height: '1.5rem', maxWidth: '50rem' }} // Adjust width to accommodate longer addresses
+        style={{ width: '85%', height: '1.5rem', maxWidth: '50rem' }} // Adjust width to accommodate longer addresses
       />
       {suggestions.length > 0 && (
         <ul
