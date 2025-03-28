@@ -8,7 +8,7 @@ const About = ({ isMobile }) => (
     </div>
     <br />
     <div>
-      The frontend is a react app hosted using Azure Static Web Apps. The backend is a Python Api hosted on Azure App Services. The route info is retrieved using the Google Maps API. Routes are computed every ten minutes using an Azure Logic App, and data is stored in Azure SQL.
+      The frontend is a react app hosted using Azure Static Web Apps. The backend is a Python Api hosted on Azure App Services. The route info is retrieved using the Here Maps API. Routes are computed every ten minutes using an Azure Logic App, and data is stored in Azure SQL.
     </div>
   </div>
 );
