@@ -3,7 +3,7 @@ import styles from '../styles';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { subHours, subDays } from 'date-fns';
 
-const RouteDurationGraph = ({ routeData, convertDurationStringToTime, convertToUserTimezone }) => {
+const RouteDurationGraph = ({ routeData, convertDurationStringToTime, convertToUserTimezone, isMobile }) => {
   const [filteredData, setFilteredData] = useState([]);
   const [filter, setFilter] = useState('24h');
 
@@ -133,30 +133,37 @@ const RouteDurationGraph = ({ routeData, convertDurationStringToTime, convertToU
           ))}
         </div>
       )}
-      <ResponsiveContainer width="100%" height={400}>
-        <LineChart data={filteredData}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis
-            dataKey="Time"
-            tickFormatter={formatTick}
-            ticks={getXAxisTicks()}
-            domain={[() => Math.min(...filteredData.map(data => data.Time)), 'dataMax']}
-            scale="time"
-            type="number"
-            allowDataOverflow
-          />
-          <YAxis
-            dataKey="Duration"
-            tickFormatter={formatYAxisTick}
-            ticks={getYAxisTickValues()}
-            domain={['auto', 'auto']}
-            tickCount={10}
-          />
-          <Tooltip labelFormatter={formatTick} formatter={convertDurationStringToTime} />
-          <Legend />
-          <Line type="monotone" dataKey="Duration" stroke="#8884d8" activeDot={{ r: 8 }} />
-        </LineChart>
-      </ResponsiveContainer>
+      <div
+        style={{
+          width: '100%',
+          height: isMobile ? '65vh' : '400px', // Adjust height dynamically based on isMobile
+        }}
+      >
+        <ResponsiveContainer>
+          <LineChart data={filteredData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis
+              dataKey="Time"
+              tickFormatter={formatTick}
+              ticks={getXAxisTicks()}
+              domain={[() => Math.min(...filteredData.map(data => data.Time)), 'dataMax']}
+              scale="time"
+              type="number"
+              allowDataOverflow
+            />
+            <YAxis
+              dataKey="Duration"
+              tickFormatter={formatYAxisTick}
+              ticks={getYAxisTickValues()}
+              domain={['auto', 'auto']}
+              tickCount={10}
+            />
+            <Tooltip labelFormatter={formatTick} formatter={convertDurationStringToTime} />
+            <Legend />
+            <Line type="monotone" dataKey="Duration" stroke="#8884d8" activeDot={{ r: 8 }} />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 };

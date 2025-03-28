@@ -4,7 +4,7 @@ import styles from '../styles';
 import LoadingSpinner from './loadingSpinner';
 import RouteDurationGraph from './routeDurationGraph';
 
-const RouteDetails = ({ route, onBack, userId, onDelete }) => {
+const RouteDetails = ({ route, onBack, userId, onDelete, isMobile }) => {
   const [currentRouteDirectionalInfo, setCurrentRouteDirectionalInfo] = useState(null);
   const [routeData, setRouteData] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -124,6 +124,7 @@ const RouteDetails = ({ route, onBack, userId, onDelete }) => {
                     routeData={routeData} 
                     convertDurationStringToTime={convertDurationStringToTime} 
                     convertToUserTimezone={convertToUserTimezone} 
+                    isMobile={isMobile}
                   />
                 </>
               ) : (

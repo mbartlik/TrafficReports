@@ -36,6 +36,7 @@ const Home = ({ routes, setRoutes, loading, isMobile, isDbActive, isAuthenticate
               onBack={() => setSelectedRoute(null)} 
               userId={userId} 
               onDelete={handleDelete} 
+              isMobile={isMobile}
             />
           ) : (
             <>
