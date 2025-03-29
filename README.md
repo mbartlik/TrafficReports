@@ -16,7 +16,7 @@ The project combines the power of React, Python, and Azure services to provide a
 
 - **Route Tracking:** Save driving routes and monitor how long they take over time.
 - **Commute Optimization:** Analyze route data to determine the best times to travel.
-- **Automated Data Collection:** Routes are computed every ten minutes using an Azure Logic App.
+- **Automated Data Collection:** Routes are computed every 30 minutes using an Azure Logic App.
 - **Data Storage:** Historical route data is stored securely in Azure SQL.
 
 ## Technology Stack
